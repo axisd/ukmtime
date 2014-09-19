@@ -28,9 +28,6 @@
      <property name="showGrid">
       <bool>false</bool>
      </property>
-     <attribute name="horizontalHeaderStretchLastSection">
-      <bool>true</bool>
-     </attribute>
      <column>
       <property name="text">
        <string>IP Кассы</string>

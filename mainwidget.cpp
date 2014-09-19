@@ -36,7 +36,7 @@ bool MainWidget::loadTimeZone()
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        //qError() << QString("Невозможно открыть файл: %1").arg(file.fileName());
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file.fileName());
         return false;
     }
 
@@ -56,8 +56,7 @@ bool MainWidget::loadTimeZone()
         }
         else
         {
-            qFatal(QString("Ошибка содержимого файла timezone_list.txt").toStdString()
-                   .c_str());
+            qCritical() << "Ошибка содержимого файла timezone_list.txt";
             QMessageBox::warning(this,
                                  tr("Ошибка"),
                                  tr("Ошибка содержимого файла timezone_list.txt"),
@@ -80,6 +79,8 @@ bool MainWidget::loadTimeZone()
         ++i;
     }
 
+    qDebug() << "Загрузка содержимого файла timezone_list.txt - Успешно";
+
     return true;
 }
 
@@ -91,8 +92,7 @@ bool MainWidget::loadIPList()
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qFatal(QString("Невозможно открыть файл: %1").arg(file.fileName())
-                                                          .toStdString().c_str());
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file.fileName());
         return false;
     }
 
@@ -101,10 +101,12 @@ bool MainWidget::loadIPList()
     do
     {
         line = in.readLine();
+
         if(line.size() == 0)
         {
             break;
         }
+
         iplist.insert(line, NA);
     } while (1);
 
@@ -112,12 +114,15 @@ bool MainWidget::loadIPList()
 
     updateIpStausTable();
 
+    qDebug() << "Загрузка содержимого файла iplist.txt - Успешно";
+
     return true;
 }
 
 void MainWidget::updateIpStausTable()
 {
     ui->ipTable->clear();
+    ui->ipTable->setHorizontalHeaderLabels(QStringList() << "IP Кассы" << "Состояние");
     ui->ipTable->setRowCount(iplist.size());
     int row(0);
     QHash<QString, HostIpStatus>::const_iterator i = iplist.constBegin();
@@ -173,6 +178,7 @@ void MainWidget::testIp()
         QString addr("root@");
         addr.append(i.key());
 
+        qDebug() << QString("Старт plink на %1").arg(i.key());
         QProcess plink;
         plink.start("plink", QStringList() << "-batch"
                    << "-pw"
@@ -183,22 +189,22 @@ void MainWidget::testIp()
 
         if (!plink.waitForStarted(1000))
         {
-            qDebug() << "Timeout during wait start plink";
+            qWarning() << "Таймаут при старте plink";
         }
 
         if (!plink.waitForFinished(1000))
         {
-            qDebug() << "Timeout during wait finish plink";
+            qWarning() << "Таймаут при остановке plink";
         }
 
         if(plink.readAll().contains("OK"))
         {
             i.value() = ONLINE;
-            qDebug() << QString("Check %1 - ONLINE").arg(i.key());
+            qDebug() << QString("Результат проверки %1 - ONLINE").arg(i.key());
         }
         else
         {
-            qDebug() << QString("Check %1 - OFFLINE").arg(i.key());
+            qDebug() << QString("Результат проверки %1 - OFFLINE").arg(i.key());
             i.value() = OFFLINE;
         }
 
