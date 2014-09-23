@@ -17,7 +17,7 @@ public:
     ~MainWidget();
 
 private:
-    enum HostIpStatus { NA, ONLINE, OFFLINE };
+    enum HostIpStatus { NA, ONLINE, OFFLINE, CP_OK, CP_FAIL, MKDIR_OK, MKDIR_FAIL };
     Ui::MainWidget *ui;
     bool ipTested;
     bool loadTimeZone();
@@ -36,6 +36,7 @@ private:
 private slots:
     void setEnableButton();
     void testIp();
+    void setTime();
 };
 
 #endif // MAINWIDGET_H

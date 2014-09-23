@@ -21,6 +21,7 @@ MainWidget::MainWidget(QWidget *parent) :
 
     connect(ui->zoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableButton()));
     connect(ui->testButton, SIGNAL(clicked()), this, SLOT(testIp()));
+    connect(ui->setButton, SIGNAL(clicked()), this, SLOT(setTime()));
 }
 
 MainWidget::~MainWidget()
@@ -135,6 +136,7 @@ void MainWidget::updateIpStausTable()
         ++row;
         ++i;
     }
+    ui->ipTable->resizeColumnsToContents();
 }
 
 QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
@@ -150,6 +152,26 @@ QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
         case OFFLINE:
         {
             decodingStatus = "Не в сети";
+            break;
+        }
+        case MKDIR_OK:
+        {
+            decodingStatus = "Папка создана";
+            break;
+        }
+        case MKDIR_FAIL:
+        {
+            decodingStatus = "Неуспешное создание папки";
+            break;
+        }
+        case CP_OK:
+        {
+            decodingStatus = "Скопировано";
+            break;
+        }
+        case CP_FAIL:
+        {
+            decodingStatus = "Неуспешное копирование";
             break;
         }
         default:
@@ -219,6 +241,127 @@ void MainWidget::testIp()
 
         ++i;
     }
+
+    updateIpStausTable();
+}
+
+void MainWidget::setTime()
+{
+    QHash<QString, HostIpStatus>::iterator i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == ONLINE)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+            QString path("/usr/local/ukmtimeup");
+
+            QProcess plink;
+            QStringList args_list;
+            args_list << "-batch"
+                      << "-pw"
+                      << "xxxxxx"
+                      << addr
+                      << "mkdir"
+                      << path;
+
+            qDebug() << QString("Создание папки %1 на %2").arg(path).arg(i.key());
+            qDebug() << "plink" << args_list;
+
+            plink.start("plink", args_list);
+
+            if (!plink.waitForStarted(1000))
+            {
+                qWarning() << "Таймаут при старте plink. Прерывание процесса.";
+                i.value() = MKDIR_FAIL;
+                ++i;
+                break;
+            }
+
+            if (!plink.waitForFinished(1000))
+            {
+                qWarning() << "Таймаут при остановке plink. Прерывание процесса.";
+                i.value() = MKDIR_FAIL;
+                ++i;
+                break;
+            }
+
+            i.value() = MKDIR_OK;
+
+            qDebug() << "Результат: " << plink.readAllStandardOutput();
+
+            procEvent(100);
+        }
+
+        QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+        if(listI.size() > 0)
+        {
+            ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+        }
+
+        ++i;
+    }
+
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == MKDIR_OK)
+        {
+            QString addr("root@");
+            QString path("/usr/local/ukmtimeup");
+
+            addr.append(i.key()).append(":").append(path);
+
+            QString patch_file("timezone_patch.zip");
+
+            QProcess pscp;
+            QStringList args_list;
+            args_list << "/C"
+                      << "rssh-1host.cmd"
+                      << i.key();
+
+            pscp.setWorkingDirectory(qApp->applicationDirPath());
+
+            qDebug() << QString("Старт копирования файла %1 на %2")
+                        .arg(patch_file)
+                        .arg(i.key());
+            qDebug() << "cmd.exe" << args_list;
+
+            pscp.start("cmd.exe", args_list);
+
+            if (!pscp.waitForStarted(1000))
+            {
+                qWarning() << "Таймаут при старте pscp. Прерывание процесса.";
+                i.value() = CP_FAIL;
+                ++i;
+                break;
+            }
+
+            if (!pscp.waitForFinished(1000))
+            {
+                qWarning() << "Таймаут при остановке pscp. Прерывание процесса.";
+                i.value() = CP_FAIL;
+                ++i;
+                break;
+            }
+
+            i.value() = CP_OK;
+
+            qDebug() << "Результат: " << pscp.readAllStandardOutput();
+
+            procEvent(100);
+        }
+
+        QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+        if(listI.size() > 0)
+        {
+            ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+        }
+
+        ++i;
+    }
+
+    updateIpStausTable();
 }
 
 void MainWidget::procEvent(int pause)
