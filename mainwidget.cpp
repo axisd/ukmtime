@@ -174,6 +174,36 @@ QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
             decodingStatus = "Неуспешное копирование";
             break;
         }
+        case UNZIP_OK:
+        {
+            decodingStatus = "Распаковано";
+            break;
+        }
+        case UNZIP_FAIL:
+        {
+            decodingStatus = "Неуспешная распаковка";
+            break;
+        }
+        case CHMOD_OK:
+        {
+            decodingStatus = "Флаги запуска устновлены";
+            break;
+        }
+        case CHMOD_FAIL:
+        {
+            decodingStatus = "Неуспешная установка флагов";
+            break;
+        }
+        case INSTALL_OK:
+        {
+            decodingStatus = "Установлено";
+            break;
+        }
+        case INSTALL_FAIL:
+        {
+            decodingStatus = "Неуспешная установка";
+            break;
+        }
         default:
         {
             decodingStatus = "Не известно";
@@ -246,7 +276,235 @@ void MainWidget::testIp()
 }
 
 void MainWidget::setTime()
-{
+{    
+    QString path("/usr/local/ukmtimeup");
+    QStringList plink_args;
+    plink_args << "-batch" << "-pw" << "xxxxxx";
+
+    // создаём папки
+    QHash<QString, HostIpStatus>::iterator i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == ONLINE)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << "mkdir" << path;
+
+            qDebug() << QString("Создание папки %1 на %2").arg(path).arg(i.key());
+            qDebug() << "plink" << args_list;
+
+            QByteArray output;
+            if(execCommand("plink", args_list, output))
+            {
+                i.value() = MKDIR_OK;
+            }
+            else
+            {
+                i.value() = MKDIR_FAIL;
+            }
+
+            QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+            if(listI.size() > 0)
+            {
+                ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+            }
+        }
+
+        ++i;
+
+        procEvent(100);
+    }
+
+    // копируем файлы
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == MKDIR_OK)
+        {
+            QString addr("root@");
+            addr.append(i.key()).append(":").append(path);
+
+            QStringList args_list;
+            args_list << "/C" << "rssh-1host.cmd" << i.key();
+
+            qDebug() << QString("Старт копирования файла %1").arg(i.key());
+            qDebug() << "cmd.exe" << args_list;
+
+            QByteArray output;
+            if(execCommand("cmd.exe", args_list, output))
+            {
+                if(output.contains("completed"))
+                {
+                    qDebug() << QString("Результат копирования - OK");
+                    i.value() = CP_OK;
+                }
+                else
+                {
+                    qDebug() << QString("Результат копирования - FAIL");
+                    i.value() = CP_FAIL;
+                }
+            }
+            else
+            {
+                i.value() = CP_FAIL;
+            }
+
+            qDebug() << "Результат: " << output;
+
+            QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+            if(listI.size() > 0)
+            {
+                ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+            }
+        }
+
+        ++i;
+
+        procEvent(100);
+    }
+
+    // распаковываем
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == CP_OK)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+
+            QString patch_file("/usr/local/ukmtimeup/timezone_patch.zip");
+
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << "unzip" << patch_file << "-d" << path;
+
+            qDebug() << QString("Распаковка архива %1 в %2 на %3")
+                        .arg(patch_file)
+                        .arg(path)
+                        .arg(i.key());
+            qDebug() << "plink" << args_list;
+
+            QByteArray output;
+            if(execCommand("plink", args_list, output))
+            {
+                i.value() = UNZIP_OK;
+            }
+            else
+            {
+                i.value() = UNZIP_FAIL;
+            }
+
+            QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+            if(listI.size() > 0)
+            {
+                ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+            }
+        }
+
+        ++i;
+
+        procEvent(100);
+    }
+
+    // делаем скрипт запускаемым
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == UNZIP_OK)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+
+            QString install_script("/usr/local/ukmtimeup/install.sh");
+
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << "chmod" << "-v" << "a+x" << install_script;
+
+            qDebug() << QString("Создание запускаемого скрипта на %1").arg(i.key());
+            qDebug() << "plink" << args_list;
+
+            QByteArray output;
+            if(execCommand("plink", args_list, output))
+            {
+                i.value() = CHMOD_OK;
+            }
+            else
+            {
+                i.value() = CHMOD_FAIL;
+            }
+
+            QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+            if(listI.size() > 0)
+            {
+                ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+            }
+        }
+
+        ++i;
+
+        procEvent(100);
+    }
+
+    // устанавливаем
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == CHMOD_OK)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+
+            QString install_script("/usr/local/ukmtimeup/install.sh");
+
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << install_script;
+
+            qDebug() << QString("Установка скриптов на %1").arg(i.key());
+            qDebug() << "plink" << args_list;
+
+            QByteArray output;
+            if(execCommand("plink", args_list, output))
+            {
+                if(output.contains("SUCCESS"))
+                {
+                    qDebug() << QString("Результат установки - OK");
+                    i.value() = INSTALL_OK;
+                }
+                else
+                {
+                    qDebug() << QString("Результат установки - FAIL");
+                    i.value() = INSTALL_FAIL;
+                }
+            }
+            else
+            {
+                i.value() = INSTALL_FAIL;
+            }
+
+            qDebug() << "Результат: " << output;
+
+            QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+            if(listI.size() > 0)
+            {
+                ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+            }
+        }
+
+        ++i;
+
+        procEvent(100);
+    }
+
+    /*QStringList plink_args;
+    plink_args << "-batch" << "-pw" << "xxxxxx";
+
+    // создаём папки
     QHash<QString, HostIpStatus>::iterator i = iplist.begin();
     while (i != iplist.end())
     {
@@ -258,12 +516,8 @@ void MainWidget::setTime()
 
             QProcess plink;
             QStringList args_list;
-            args_list << "-batch"
-                      << "-pw"
-                      << "xxxxxx"
-                      << addr
-                      << "mkdir"
-                      << path;
+            args_list << plink_args << addr
+                      << "mkdir" << path;
 
             qDebug() << QString("Создание папки %1 на %2").arg(path).arg(i.key());
             qDebug() << "plink" << args_list;
@@ -272,7 +526,7 @@ void MainWidget::setTime()
 
             if (!plink.waitForStarted(1000))
             {
-                qWarning() << "Таймаут при старте plink. Прерывание процесса.";
+                qWarning() << "Таймаут при старте plink. Прерывание процесса." << plink.readAllStandardOutput();
                 i.value() = MKDIR_FAIL;
                 ++i;
                 break;
@@ -280,7 +534,7 @@ void MainWidget::setTime()
 
             if (!plink.waitForFinished(1000))
             {
-                qWarning() << "Таймаут при остановке plink. Прерывание процесса.";
+                qWarning() << "Таймаут при остановке plink. Прерывание процесса." << plink.readAllStandardOutput();
                 i.value() = MKDIR_FAIL;
                 ++i;
                 break;
@@ -302,6 +556,7 @@ void MainWidget::setTime()
         ++i;
     }
 
+    // копируем файлы
     i = iplist.begin();
     while (i != iplist.end())
     {
@@ -329,25 +584,35 @@ void MainWidget::setTime()
 
             pscp.start("cmd.exe", args_list);
 
-            if (!pscp.waitForStarted(1000))
+            if (!pscp.waitForStarted())
             {
-                qWarning() << "Таймаут при старте pscp. Прерывание процесса.";
+                qWarning() << "Таймаут при старте pscp. Прерывание процесса." << pscp.readAllStandardOutput();
                 i.value() = CP_FAIL;
                 ++i;
                 break;
             }
 
-            if (!pscp.waitForFinished(1000))
+            if (!pscp.waitForFinished())
             {
-                qWarning() << "Таймаут при остановке pscp. Прерывание процесса.";
+                qWarning() << "Таймаут при остановке pscp. Прерывание процесса." << pscp.readAllStandardOutput();
                 i.value() = CP_FAIL;
                 ++i;
                 break;
             }
 
-            i.value() = CP_OK;
+            QByteArray output = pscp.readAllStandardOutput();
+            if(output.contains("completed"))
+            {
+                qDebug() << QString("Результат копирования - OK");
+                i.value() = CP_OK;
+            }
+            else
+            {
+                qDebug() << QString("Результат копирования - FAIL");
+                i.value() = CP_FAIL;
+            }
 
-            qDebug() << "Результат: " << pscp.readAllStandardOutput();
+            qDebug() << "Результат: " << output;
 
             procEvent(100);
         }
@@ -361,7 +626,215 @@ void MainWidget::setTime()
         ++i;
     }
 
-    updateIpStausTable();
+    // распаковываем
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == CP_OK)
+        {
+            QString addr("root@");
+            QString path("/usr/local/ukmtimeup");
+
+            addr.append(i.key());
+
+            QString patch_file("/usr/local/ukmtimeup/timezone_patch.zip");
+
+            // tar xvzf timezone_patch.zip
+            QProcess plink;
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << "unzip" << patch_file << "-d" << path;
+
+            qDebug() << QString("Распаковка архива %1 в %2 на %3")
+                        .arg(patch_file)
+                        .arg(path)
+                        .arg(i.key());
+
+            qDebug() << "plink" << args_list;
+
+            plink.start("plink", args_list);
+
+            if (!plink.waitForStarted(1000))
+            {
+                qWarning() << "Таймаут при старте plink. Прерывание процесса." << plink.readAllStandardOutput();
+                i.value() = UNZIP_FAIL;
+                ++i;
+                break;
+            }
+
+            if (!plink.waitForFinished(1000))
+            {
+                qWarning() << "Таймаут при остановке plink. Прерывание процесса." << plink.readAllStandardOutput();
+                i.value() = UNZIP_FAIL;
+                ++i;
+                break;
+            }
+
+            i.value() = UNZIP_OK;
+
+            qDebug() << "Результат: " << plink.readAllStandardOutput();
+
+            procEvent(100);
+        }
+
+        QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+        if(listI.size() > 0)
+        {
+            ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+        }
+
+        ++i;
+    }
+
+    // делаем скрипт запускаемым
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == UNZIP_OK)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+
+            QString install_script("/usr/local/ukmtimeup/install.sh");
+
+            // tar xvzf timezone_patch.zip
+            QProcess plink;
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << "chmod" << "-v" << "a+x" << install_script;
+
+            qDebug() << QString("Создание запускаемого скрипта на %1")
+                        .arg(i.key());
+
+            qDebug() << "plink" << args_list;
+
+            plink.start("plink", args_list);
+
+            if (!plink.waitForStarted(1000))
+            {
+                qWarning() << "Таймаут при старте plink. Прерывание процесса." << plink.readAllStandardOutput();
+                i.value() = CHMOD_FAIL;
+                ++i;
+                break;
+            }
+
+            if (!plink.waitForFinished(1000))
+            {
+                qWarning() << "Таймаут при остановке plink. Прерывание процесса." << plink.readAllStandardOutput();
+                i.value() = CHMOD_FAIL;
+                ++i;
+                break;
+            }
+
+            i.value() = CHMOD_OK;
+
+            qDebug() << "Результат: " << plink.readAllStandardOutput();
+
+            procEvent(100);
+        }
+
+        QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+        if(listI.size() > 0)
+        {
+            ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+        }
+
+        ++i;
+    }
+
+    // устанавливаем
+    i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if(i.value() == CHMOD_OK)
+        {
+            QString addr("root@");
+            addr.append(i.key());
+
+            QString install_script("/usr/local/ukmtimeup/install.sh");
+
+            // tar xvzf timezone_patch.zip
+            QProcess plink;
+            QStringList args_list;
+            args_list << plink_args << addr
+                      << install_script;
+
+            qDebug() << QString("Установка скриптов на %1")
+                        .arg(i.key());
+
+            qDebug() << "plink" << args_list;
+
+            plink.start("plink", args_list);
+
+            if (!plink.waitForStarted(1000))
+            {
+                qWarning() << "Таймаут при старте plink. Прерывание процесса." << plink.readAllStandardOutput();
+                i.value() = INSTALL_FAIL;
+                ++i;
+                break;
+            }
+
+            if (!plink.waitForFinished(1000))
+            {
+                qWarning() << "Таймаут при остановке plink. Прерывание процесса." << plink.readAllStandardOutput();
+                i.value() = INSTALL_FAIL;
+                ++i;
+                break;
+            }
+
+            QByteArray output = plink.readAllStandardOutput();
+            if(output.contains("SUCCESS"))
+            {
+                qDebug() << QString("Результат установки - OK");
+                i.value() = INSTALL_OK;
+            }
+            else
+            {
+                qDebug() << QString("Результат установки - FAIL");
+                i.value() = INSTALL_FAIL;
+            }
+
+            qDebug() << "Результат: " << output;
+
+            procEvent(100);
+        }
+
+        QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
+        if(listI.size() > 0)
+        {
+            ui->ipTable->item(listI.at(0)->row(), 1)->setText(getHostIpStatus(i.value()));
+        }
+
+        ++i;
+    }
+
+    updateIpStausTable();*/
+}
+
+bool MainWidget::execCommand(const QString __command,
+                             const QStringList __args,
+                             QByteArray &__output)
+{
+    QProcess proc;
+    qDebug() << "Команда" << __command << __args;
+
+    proc.setWorkingDirectory(qApp->applicationDirPath());
+    proc.start(__command, __args);
+
+    if (!proc.waitForStarted(1000))
+    {
+        qWarning() << "Таймаут при старте. Прерывание процесса." << proc.readAllStandardOutput();
+        return false;
+    }
+
+    if (!proc.waitForFinished(1000))
+    {
+        qWarning() << "Таймаут при остановке. Прерывание процесса." << proc.readAllStandardOutput();
+        return false;
+    }
+
+    __output = proc.readAllStandardOutput();
+    return true;
 }
 
 void MainWidget::procEvent(int pause)

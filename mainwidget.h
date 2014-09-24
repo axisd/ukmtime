@@ -17,7 +17,13 @@ public:
     ~MainWidget();
 
 private:
-    enum HostIpStatus { NA, ONLINE, OFFLINE, CP_OK, CP_FAIL, MKDIR_OK, MKDIR_FAIL };
+    enum HostIpStatus { NA, ONLINE, OFFLINE,
+                        CP_OK, CP_FAIL,
+                        MKDIR_OK, MKDIR_FAIL,
+                        UNZIP_OK, UNZIP_FAIL,
+                        CHMOD_OK, CHMOD_FAIL,
+                        INSTALL_OK, INSTALL_FAIL };
+
     Ui::MainWidget *ui;
     bool ipTested;
     bool loadTimeZone();
@@ -30,6 +36,10 @@ private:
 
     QHash<QString,QString> timezonelist;
     QHash<QString,HostIpStatus> iplist;
+
+    bool execCommand(const QString __command,
+                     const QStringList __args,
+                     QByteArray &__output);
 
     void procEvent(int pause);
 
