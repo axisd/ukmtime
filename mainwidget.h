@@ -45,8 +45,14 @@ private:
 
 private slots:
     void setEnableButton();
+    void setEnableSetter();
+    void setDisableSetter();
     void testIp();
     void setTime();
+
+signals:
+    void checking();
+    void checked();
 };
 
 #endif // MAINWIDGET_H
