@@ -126,8 +126,8 @@ bool MainWidget::loadIPList()
 
 void MainWidget::updateIpStausTable()
 {
-    ui->ipTable->clear();
-    ui->ipTable->setHorizontalHeaderLabels(QStringList() << "IP Кассы" << "Состояние");
+    ui->ipTable->clearContents();
+    //ui->ipTable->setHorizontalHeaderLabels(QStringList() << "IP Кассы" << "Состояние");
     ui->ipTable->setRowCount(iplist.size());
     int row(0);
     QHash<QString, HostIpStatus>::const_iterator i = iplist.constBegin();
@@ -142,7 +142,7 @@ void MainWidget::updateIpStausTable()
     }
     ui->ipTable->resizeColumnsToContents();
 
-    ui->ipTable->verticalHeader()->stretchLastSection();
+    //ui->ipTable->verticalHeader()->stretchLastSection();
 }
 
 QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
