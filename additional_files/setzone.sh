@@ -32,6 +32,26 @@ mv /etc/localtime  /etc/localtime-old
 result
 echo " Backup file is /etc/localtime-old "
 
+echo " Remove /usr/share/zoneinfo-posix "
+# Перемещаем старую папку zoneinfo-posix
+mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix-old
+result
+echo " Remove /usr/share/zoneinfo-posix success "
+
+echo " Create sym-link /usr/share/zoneinfo-posix "
+# Вместо неё будет симлинк на паку zoneinfo
+ln -s /usr/share/zoneinfo /usr/share/zoneinfo-posix
+result
+echo " Create sym-link /usr/share/zoneinfo-posix success "
+
+echo " Copy new zoneinfo "
+# Копируем новые файлы зон, утилиты, маны и библиотеку
+BASE_FOLDER="/usr/local/ukmtimeup"
+
+cp -Rf $BASE_FOLDER/tmpunpack/* /
+result
+echo " Copy new zoneinfo success"
+
 NEWZONE="$1"
 echo " New timezone $NEWZONE "
 

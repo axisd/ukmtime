@@ -43,6 +43,8 @@ private:
 
     void procEvent(int pause);
 
+    bool createSetTimezoneScript(const QString __zone_name) const;
+
 private slots:
     void setEnableButton();
     void setEnableSetter();

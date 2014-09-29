@@ -301,6 +301,16 @@ void MainWidget::testIp()
 
 void MainWidget::setTime()
 {
+    if(!createSetTimezoneScript( timezonelist.value( ui->zoneTable->currentItem()->text() ) ))
+    {
+        qCritical() << "Создание скрипта с новой зоной - FAIL";
+        return;
+    }
+    else
+    {
+        qDebug() << "Создание скрипта с новой зоной - OK";
+    }
+
     QHash<QString, HostIpStatus>::iterator i = iplist.begin();
     while (i != iplist.end())
     {
@@ -377,4 +387,29 @@ void MainWidget::procEvent(int pause)
     QEventLoop *tELoop = new QEventLoop(this);
     QTimer::singleShot(pause, tELoop, SLOT(quit()));
     tELoop->exec();
+}
+
+bool MainWidget::createSetTimezoneScript(const QString __zone_name) const
+{
+    QFile file(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("setnewtimezone.sh"));
+
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file.fileName());
+        return false;
+    }
+
+    QTextStream out(&file);
+
+    out << QString("#!/bin/sh\n\n")
+        << QString("echo \" Starting setzone.sh with zone %1 (`date`)\"\n").arg(__zone_name)
+        << QString("/usr/local/ukmtimeup/./setzone.sh %1\n").arg(__zone_name);
+
+    file.close();
+
+    qDebug() << "Создание файла setnewtimezone.sh - Успешно";
+
+    return true;
 }

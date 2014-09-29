@@ -3,15 +3,28 @@
 set host=%1
 set remote_dir=/usr/local/ukmtimeup
 set file_to_transfer=timezone_patch.zip
+set script_to_transfer=setnewtimezone.sh
 set remote_script=install.sh
 
-echounix "Create dir %remote_dir% at %host%"
+echounix "Check and dir %remote_dir% at %host%"
 plink -batch -pw xxxxxx root@%host% mkdir %remote_dir%
-IF %ERRORLEVEL% NEQ 0 GOTO error
-echounix "Create dir success"
+IF %ERRORLEVEL% NEQ 0 ( 
+	echounix "Dir %remote_dir% at %host% already exist"
+	echounix "Remove dir %remote_dir% at %host%"
+	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%
+	IF %ERRORLEVEL% NEQ 0 GOTO error
+	echounix "Remove dir %remote_dir% at %host% success"
+) else (	
+	echounix "Create dir success"
+)
 
 echounix "Copy file %file_to_transfer% to %host%"
 pscp -batch -pw xxxxxx %file_to_transfer% root@%host%:%remote_dir%
+IF %ERRORLEVEL% NEQ 0 GOTO error
+echounix "Copy file success"
+
+echounix "Copy file %script_to_transfer% to %host%"
+pscp -batch -pw xxxxxx %script_to_transfer% root@%host%:%remote_dir%
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "Copy file success"
 
@@ -21,7 +34,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "Unzip file success"
 
 echounix "chmod -v a+x to file %remote_script% at %host%"
-plink -batch -pw xxxxxx root@%host% chmod -v a+x %remote_dir%/%remote_script%
+plink -batch -pw xxxxxx root@%host% chmod -v a+x %remote_dir%/*.sh
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "chmod file success"
 
