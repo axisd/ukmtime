@@ -16,7 +16,7 @@ echo " Start setzone.sh "
 echo " Save current time "
 # сохранием текущие дату и время
 CURDATE=`date +%Y/%m/%d`
-CURTIME=`date +%I:%M:%S`
+CURTIME=`date +%H:%M:%S`
 CURDATETIME="$CURDATE $CURTIME"
 echo " Current time is $CURDATETIME "
 
@@ -81,7 +81,7 @@ if [[ "$NEWZONE" -ne "$CURZONE" ]]; then
 	# Зона изменилась
 	echo " Reset time "
 	# Восстанавливаем сохраненное время
-	date "+%Y/%m/%d %I:%M:%S" --set="$CURDATETIME"
+	date "+%Y/%m/%d %H:%M:%S" --set="$CURDATETIME"
 	result
 	echo " Current time `date` "
 fi

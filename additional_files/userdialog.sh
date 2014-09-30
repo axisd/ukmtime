@@ -1,7 +1,7 @@
 clear
 
 NEWDATE=`date +%Y/%m/%d`
-NEWTIME=`date +%I:%M:%S`
+NEWTIME=`date +%H:%M:%S`
 CURZONE=${LSLOCALTIME#*info/}
 
 echo

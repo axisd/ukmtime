@@ -2,7 +2,7 @@
 
 start()
 {
-	local time="date +%y%m%d%I%M"	
+	local time="date +%y%m%d%H%M"	
 	local basedir=/usr/local/ukmtimeup
 	logger -t ukmtimeup "$0: start() begin"
 	if [[ $(eval "$time") -ge 1410260200 ]]; then
