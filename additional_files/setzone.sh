@@ -16,7 +16,7 @@ echo " Start setzone.sh "
 echo " Save current time "
 # сохранием текущие дату и время
 CURDATE=`date +%Y/%m/%d`
-CURTIME=`date +%k:%M:%S`
+CURTIME=`date +%I:%M:%S`
 CURDATETIME="$CURDATE $CURTIME"
 echo " Current time is $CURDATETIME "
 
@@ -32,17 +32,24 @@ mv /etc/localtime  /etc/localtime-old
 result
 echo " Backup file is /etc/localtime-old "
 
-echo " Remove /usr/share/zoneinfo-posix "
+echo " Backup zoneinfo files "
+echo " Move /usr/share/zoneinfo-posix "
 # Перемещаем старую папку zoneinfo-posix
-mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix-old
+mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix.2014
 result
-echo " Remove /usr/share/zoneinfo-posix success "
+echo " Move /usr/share/zoneinfo-posix success "
 
-echo " Create sym-link /usr/share/zoneinfo-posix "
-# Вместо неё будет симлинк на паку zoneinfo
-ln -s /usr/share/zoneinfo /usr/share/zoneinfo-posix
+echo " Move /usr/share/zoneinfo "
+# Перемещаем старую папку zoneinfo
+mv /usr/share/zoneinfo /usr/share/zoneinfo.2014
 result
-echo " Create sym-link /usr/share/zoneinfo-posix success "
+echo " Move /usr/share/zoneinfo success "
+
+echo " Remove /usr/share/zoneinfo-leaps "
+# Перемещаем старую папку zoneinfo-posix
+mv /usr/share/zoneinfo-leaps /usr/share/zoneinfo-leaps.2014
+result
+echo " Remove /usr/share/zoneinfo-leaps success "
 
 echo " Copy new zoneinfo "
 # Копируем новые файлы зон, утилиты, маны и библиотеку
@@ -51,6 +58,12 @@ BASE_FOLDER="/usr/local/ukmtimeup"
 cp -Rf $BASE_FOLDER/tmpunpack/* /
 result
 echo " Copy new zoneinfo success"
+
+echo " Create sym-link /usr/share/zoneinfo-posix "
+# Вместо неё будет симлинк на папку zoneinfo
+ln -s /usr/share/zoneinfo /usr/share/zoneinfo-posix
+result
+echo " Create sym-link /usr/share/zoneinfo-posix success "
 
 NEWZONE="$1"
 echo " New timezone $NEWZONE "
@@ -68,7 +81,7 @@ if [[ "$NEWZONE" -ne "$CURZONE" ]]; then
 	# Зона изменилась
 	echo " Reset time "
 	# Восстанавливаем сохраненное время
-	date "+%Y/%m/%d %k:%M:%S" --set="$CURDATETIME"
+	date "+%Y/%m/%d %I:%M:%S" --set="$CURDATETIME"
 	result
 	echo " Current time `date` "
 fi

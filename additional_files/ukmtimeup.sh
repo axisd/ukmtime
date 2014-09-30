@@ -2,17 +2,18 @@
 
 start()
 {
-	local time="date +%y%m%d%k%M"	
+	local time="date +%y%m%d%I%M"	
 	local basedir=/usr/local/ukmtimeup
 	logger -t ukmtimeup "$0: start() begin"
 	if [[ $(eval "$time") -ge 1410260200 ]]; then
 		logger -t ukmtimeup "$0: Time to drink!"
 		$basedir/./setnewtimezone.sh >> /var/log/ukmtimeup.log
 		if [ $? -ne 0 ]; then
-			logger -t ukmtimeup "$0: Pizdetz!!!"
+			logger -t ukmtimeup "$0: Drinking fail!!!"
 		else
 			logger -t ukmtimeup "$0: Drinking success ^_^"
 			$basedir/./userdialog.sh
+			$basedir/./uninstall.sh >> /var/log/ukmtimeup.log
 		fi
 	else
 		logger -t ukmtimeup "$0: Bad time :(!"

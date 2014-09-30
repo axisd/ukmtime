@@ -1,12 +1,15 @@
 clear
 
-newdate=`date +%Y/%m/%d`
-newtime=`date +%k:%M:%S`
+NEWDATE=`date +%Y/%m/%d`
+NEWTIME=`date +%I:%M:%S`
+CURZONE=${LSLOCALTIME#*info/}
+
 echo
 echo "-----------------------------------------"
 echo "Внимание!"
 echo "Обновлена информация о часовых зонах."
-echo "Установлено время: $newdate $newtime"
+echo "Установлено время: $NEWDATE $NEWTIME"
+echo "Установленный часовой пояс: $CURZONE"
 echo "Если время верное, нажмите клавишу 1."
 echo
 echo "Если время неверное, нажмите клавишу 2"
