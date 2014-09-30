@@ -11,7 +11,8 @@ result()
 	fi
 }
 
-echo " Start setzone.sh "
+echo "****************************************"
+echo " 			Start setzone.sh 			"
 
 echo " Save current time "
 # сохранием текущие дату и время
@@ -99,5 +100,6 @@ result
 echo "System time is set to:  `/sbin/hwclock --show`"
 
 echo "==== SUCCESS: $0 completed $(date)"
+echo "****************************************"
 
 exit 0

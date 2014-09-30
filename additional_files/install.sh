@@ -11,21 +11,53 @@ result()
 	fi
 }
 
+SFILE="S98ukmtimeup"
+KFILE="K02ukmtimeup"
+
+echo "****************************************"
 echo "Install UkmTimeUp autorun Start script"
-ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc3.d/S98ukmtimeup
-result
+if [ -f "/etc/rc3.d/$SFILE" ]; then
+	echo " /etc/rc3.d/$SFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc3.d/$SFILE
+	result
+fi
 
 echo "Install UkmTimeUp autorun Stop scripts"
-ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc0.d/K02ukmtimeup
-result
-ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc1.d/K02ukmtimeup
-result
-ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc2.d/K02ukmtimeup
-result
-ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc4.d/K02ukmtimeup
-result
-ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/K02ukmtimeup
-result
+if [ -f "/etc/rc0.d/$KFILE" ]; then
+	echo " /etc/rc0.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc0.d/$KFILE
+	result
+fi
+
+if [ -f "/etc/rc1.d/$KFILE" ]; then
+	echo " /etc/rc1.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc1.d/$KFILE
+	result
+fi
+
+if [ -f "/etc/rc2.d/$KFILE" ]; then
+	echo " /etc/rc2.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc2.d/$KFILE
+	result
+fi
+
+if [ -f "/etc/rc4.d/$KFILE" ]; then
+	echo " /etc/rc4.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc4.d/$KFILE
+	result
+fi
+
+if [ -f "/etc/rc5.d/$KFILE" ]; then
+	echo " /etc/rc5.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$KFILE
+	result
+fi
 
 BASE_FOLDER="/usr/local/ukmtimeup"
 ZONE_ARCH="zoneinfo.tar.gz"
@@ -36,3 +68,4 @@ tar -xzf $BASE_FOLDER/$ZONE_ARCH -C $BASE_FOLDER/$TMP_DIR
 result
 
 echo "Success"
+echo "****************************************"

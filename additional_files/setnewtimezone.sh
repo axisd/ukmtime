@@ -1,4 +1,4 @@
 #!/bin/sh
 
-echo " Starting setzone.sh with zone Asia/Novosibirsk (`date`)"
-/usr/local/ukmtimeup/./setzone.sh Asia/Novosibirsk
+echo " Starting setzone.sh with zone Europe/Moscow (`date`)"
+/usr/local/ukmtimeup/./setzone.sh Europe/Moscow

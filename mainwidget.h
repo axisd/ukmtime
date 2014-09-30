@@ -22,7 +22,8 @@ private:
                         MKDIR_OK, MKDIR_FAIL,
                         UNZIP_OK, UNZIP_FAIL,
                         CHMOD_OK, CHMOD_FAIL,
-                        INSTALL_OK, INSTALL_FAIL };
+                        INSTALL_OK, INSTALL_FAIL,
+                        REBOOT_OK, REBOOT_FAIL};
 
     Ui::MainWidget *ui;
     bool ipTested;

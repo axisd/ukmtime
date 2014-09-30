@@ -51,6 +51,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="rebootCheckBox">
+        <property name="text">
+         <string>Перезагрузка после установки</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="setButton">
         <property name="text">
          <string>Установить</string>

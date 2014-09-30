@@ -2,6 +2,7 @@ clear
 
 NEWDATE=`date +%Y/%m/%d`
 NEWTIME=`date +%H:%M:%S`
+LSLOCALTIME=`ls -l /etc/localtime`
 CURZONE=${LSLOCALTIME#*info/}
 
 echo
@@ -12,7 +13,7 @@ echo "Установлено время: $NEWDATE $NEWTIME"
 echo "Установленный часовой пояс: $CURZONE"
 echo "Если время верное, нажмите клавишу 1."
 echo
-echo "Если время неверное, нажмите клавишу 2"
+echo "Если время неверное, нажмите любую клавишу"
 echo "и вызовите системного администратора."
 echo "-----------------------------------------"
 echo

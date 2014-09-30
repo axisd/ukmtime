@@ -6,7 +6,12 @@ set file_to_transfer=timezone_patch.zip
 set script_to_transfer=setnewtimezone.sh
 set remote_script=install.sh
 
-echounix "Check and dir %remote_dir% at %host%"
+echounix
+echounix
+echounix " ************************************ "
+echounix "	==== INSTALL.CMD ==== "
+
+echounix "Check and mkdir %remote_dir% at %host%"
 plink -batch -pw xxxxxx root@%host% mkdir %remote_dir%
 IF %ERRORLEVEL% NEQ 0 ( 
 	echounix "Dir %remote_dir% at %host% already exist"
@@ -33,7 +38,7 @@ plink -batch -pw xxxxxx root@%host% unzip %remote_dir%/%file_to_transfer% -d %re
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "Unzip file success"
 
-echounix "chmod -v a+x to file %remote_script% at %host%"
+echounix "chmod -v a+x to files at %host%"
 plink -batch -pw xxxxxx root@%host% chmod -v a+x %remote_dir%/*.sh
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "chmod file success"

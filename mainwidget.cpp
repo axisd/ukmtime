@@ -210,6 +210,16 @@ QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
             decodingStatus = "Неуспешная установка";
             break;
         }
+        case REBOOT_OK:
+        {
+            decodingStatus = "Установлено и перезагружено";
+            break;
+        }
+        case REBOOT_FAIL:
+        {
+            decodingStatus = "Установлено и не перезагружено";
+            break;
+        }
         default:
         {
             decodingStatus = "Не известно";
@@ -311,6 +321,8 @@ void MainWidget::setTime()
         qDebug() << "Создание скрипта с новой зоной - OK";
     }
 
+    emit checking();
+
     QHash<QString, HostIpStatus>::iterator i = iplist.begin();
     while (i != iplist.end())
     {
@@ -329,6 +341,31 @@ void MainWidget::setTime()
                 {
                     qDebug() << QString("Результат инсталяции - OK");
                     i.value() = INSTALL_OK;
+                    if(ui->rebootCheckBox->isChecked())
+                    {
+                        qDebug() << "Результат: " << output;
+
+                        qDebug() << QString("Перезагрузка %1").arg(i.key());
+
+                        QString addr("root@");
+                        addr.append(i.key());
+
+                        QStringList args_list;
+                        args_list << "-batch"
+                                  << "-pw" << "xxxxxx"
+                                  << addr
+                                  << "reboot";
+                        if(execCommand("plink.exe", args_list, output))
+                        {
+                            qDebug() << QString("Результат перезагрузки - OK");
+                            i.value() = REBOOT_OK;
+                        }
+                        else
+                        {
+                            qDebug() << QString("Результат перезагрузки - FAIL");
+                            i.value() = REBOOT_FAIL;
+                        }
+                    }
                 }
                 else
                 {
@@ -354,6 +391,8 @@ void MainWidget::setTime()
 
         procEvent(100);
     }
+
+    emit checked();
 }
 
 bool MainWidget::execCommand(const QString __command,
