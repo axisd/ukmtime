@@ -337,14 +337,13 @@ void MainWidget::setTime()
             QByteArray output;
             if(execCommand("cmd.exe", args_list, output))
             {
+                qDebug() << "Результат: " << output;
                 if(!output.contains("FAIL"))
                 {
                     qDebug() << QString("Результат инсталяции - OK");
                     i.value() = INSTALL_OK;
                     if(ui->rebootCheckBox->isChecked())
                     {
-                        qDebug() << "Результат: " << output;
-
                         qDebug() << QString("Перезагрузка %1").arg(i.key());
 
                         QString addr("root@");
