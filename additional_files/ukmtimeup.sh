@@ -6,17 +6,17 @@ start()
 	local basedir=/usr/local/ukmtimeup
 	logger -t ukmtimeup "$0: start() begin"
 	if [[ $(eval "$time") -ge 1410260200 ]]; then
-		logger -t ukmtimeup "$0: Time to drink!"
+		logger -t ukmtimeup "$0: Time to update zone"
 		$basedir/./setnewtimezone.sh >> /var/log/ukmtimeup.log
 		if [ $? -ne 0 ]; then
-			logger -t ukmtimeup "$0: Drinking fail!!!"
+			logger -t ukmtimeup "$0: Update zone fail"
 		else
-			logger -t ukmtimeup "$0: Drinking success ^_^"
+			logger -t ukmtimeup "$0: Update zone success"
 			$basedir/./userdialog.sh
 			$basedir/./uninstall.sh >> /var/log/ukmtimeup.log
 		fi
 	else
-		logger -t ukmtimeup "$0: Bad time :(!"
+		logger -t ukmtimeup "$0: Wrong time to update"
 	fi
 	logger -t ukmtimeup "$0: start() end"
 }
