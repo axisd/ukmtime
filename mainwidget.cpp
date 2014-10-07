@@ -16,13 +16,20 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->setupUi(this);
     ui->setButton->setDisabled(true);
     ui->zonesBox->setDisabled(true);
+    ui->newZoneTable->setDisabled(true);
 
     loadIPList();
-    loadTimeZone();
 
-    connect(ui->zoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableButton()));
-    connect(this, SIGNAL(checked()), this, SLOT(setEnableSetter()));
-    connect(this, SIGNAL(checking()), this, SLOT(setDisableSetter()));
+    loadTimeZone("cur_timezone_list.txt", currenttimezonelist);
+    loadTimeZone("new_timezone_list.txt", newtimezonelist);
+
+    updateTimeZoneTables();
+
+    connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableNewTimeZone()));
+    connect(ui->newZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableButton()));
+
+    connect(this, SIGNAL(checked()), this, SLOT(setEnableZonesBox()));
+    connect(this, SIGNAL(checking()), this, SLOT(setDisableZonesBox()));
 
     connect(ui->testButton, SIGNAL(clicked()), this, SLOT(testIp()));
     connect(ui->setButton, SIGNAL(clicked()), this, SLOT(setTime()));
@@ -33,15 +40,51 @@ MainWidget::~MainWidget()
     delete ui;
 }
 
-bool MainWidget::loadTimeZone()
+void MainWidget::updateTimeZoneTables()
+{
+    int row(0);
+
+    ui->newZoneTable->setRowCount(newtimezonelist.size());
+    QHash<QString, QString>::const_iterator i1 = newtimezonelist.constBegin();
+    while (i1 != newtimezonelist.constEnd())
+    {
+        QTableWidgetItem *newItem = new QTableWidgetItem(i1.key());
+        ui->newZoneTable->setItem(row, 0, newItem);
+        ++row;
+        ++i1;
+    }
+    ui->newZoneTable->sortItems(0);
+
+    row = 0;
+
+    ui->currentZoneTable->setRowCount(currenttimezonelist.size());
+    QHash<QString, QString>::const_iterator i2 = currenttimezonelist.constBegin();
+    while (i2 != currenttimezonelist.constEnd())
+    {
+        QTableWidgetItem *newItem = new QTableWidgetItem(i2.key());
+        ui->currentZoneTable->setItem(row, 0, newItem);
+        ++row;
+        ++i2;
+    }
+    ui->currentZoneTable->sortItems(0);
+}
+
+bool MainWidget::loadTimeZone(const QString &__fileName, QHash<QString,QString> &__hashList)
 {
     QFile file(qApp->applicationDirPath()
                .append(QDir::separator())
-               .append("timezone_list.txt"));
+               .append("extra")
+               .append(QDir::separator())
+               .append(__fileName));
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qCritical() << QString("Невозможно открыть файл: %1").arg(file.fileName());
+        QMessageBox::warning(this,
+                             tr("Ошибка"),
+                             tr("Ошибка при открытии файла %1").arg(file.fileName()),
+                             QMessageBox::Ok
+                             );
         return false;
     }
 
@@ -57,14 +100,14 @@ bool MainWidget::loadTimeZone()
         QStringList list = line.split(";", QString::SkipEmptyParts);
         if(list.size() == 2)
         {
-            timezonelist.insert(list.at(0), list.at(1));
+            __hashList.insert(list.at(0), list.at(1));
         }
         else
         {
-            qCritical() << "Ошибка содержимого файла timezone_list.txt";
+            qCritical() << QString("Ошибка содержимого файла %1").arg(file.fileName());
             QMessageBox::warning(this,
                                  tr("Ошибка"),
-                                 tr("Ошибка содержимого файла timezone_list.txt"),
+                                 tr("Ошибка содержимого файла %1").arg(file.fileName()),
                                  QMessageBox::Ok
                                  );
             return false;
@@ -73,18 +116,7 @@ bool MainWidget::loadTimeZone()
 
     file.close();
 
-    ui->zoneTable->setRowCount(timezonelist.size());
-    int row(0);
-    QHash<QString, QString>::const_iterator i = timezonelist.constBegin();
-    while (i != timezonelist.constEnd())
-    {
-        QTableWidgetItem *newItem = new QTableWidgetItem(i.key());
-        ui->zoneTable->setItem(row, 0, newItem);
-        ++row;
-        ++i;
-    }
-
-    qDebug() << "Загрузка содержимого файла timezone_list.txt - Успешно";
+    qDebug() << tr("Загрузка содержимого файла %1 - Успешно").arg(file.fileName());
 
     return true;
 }
@@ -117,17 +149,16 @@ bool MainWidget::loadIPList()
 
     file.close();
 
-    updateIpStausTable();
+    updateIpStatusTable();
 
     qDebug() << "Загрузка содержимого файла iplist.txt - Успешно";
 
     return true;
 }
 
-void MainWidget::updateIpStausTable()
+void MainWidget::updateIpStatusTable()
 {
     ui->ipTable->clearContents();
-    //ui->ipTable->setHorizontalHeaderLabels(QStringList() << "IP Кассы" << "Состояние");
     ui->ipTable->setRowCount(iplist.size());
     int row(0);
     QHash<QString, HostIpStatus>::const_iterator i = iplist.constBegin();
@@ -141,8 +172,6 @@ void MainWidget::updateIpStausTable()
         ++i;
     }
     ui->ipTable->resizeColumnsToContents();
-
-    //ui->ipTable->verticalHeader()->stretchLastSection();
 }
 
 QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
@@ -238,7 +267,7 @@ void MainWidget::setEnableButton()
     }
 }
 
-void MainWidget::setEnableSetter()
+void MainWidget::setEnableZonesBox()
 {
     if(!ui->zonesBox->isEnabled())
     {
@@ -246,7 +275,7 @@ void MainWidget::setEnableSetter()
     }
 }
 
-void MainWidget::setDisableSetter()
+void MainWidget::setDisableZonesBox()
 {
     if(ui->zonesBox->isEnabled())
     {
@@ -266,7 +295,7 @@ void MainWidget::testIp()
 
         qDebug() << QString("Старт plink на %1").arg(i.key());
         QProcess plink;
-        plink.start("plink", QStringList() << "-batch"
+        plink.start("extra/plink", QStringList() << "-batch"
                    << "-pw" << "xxxxxx"
                    << addr
                    << "echo" << "OK");
@@ -304,14 +333,12 @@ void MainWidget::testIp()
         ++i;
     }
 
-    //updateIpStausTable();
-
     emit checked();
 }
 
 void MainWidget::setTime()
 {
-    if(!createSetTimezoneScript( timezonelist.value( ui->zoneTable->currentItem()->text() ) ))
+    if(!createSetTimezoneScript( newtimezonelist.value( ui->newZoneTable->currentItem()->text() ) ))
     {
         qCritical() << "Создание скрипта с новой зоной - FAIL";
         return;
@@ -329,7 +356,7 @@ void MainWidget::setTime()
         if(i.value() == ONLINE)
         {
             QStringList args_list;
-            args_list << "/C" << "install.cmd" << i.key();
+            args_list << "/C" << "extra/install.cmd" << i.key();
 
             qDebug() << QString("Старт скрипта работы с %1").arg(i.key());
             qDebug() << "cmd.exe" << args_list;
@@ -354,7 +381,7 @@ void MainWidget::setTime()
                                   << "-pw" << "xxxxxx"
                                   << addr
                                   << "reboot";
-                        if(execCommand("plink.exe", args_list, output))
+                        if(execCommand("extra/plink.exe", args_list, output))
                         {
                             qDebug() << QString("Результат перезагрузки - OK");
                             i.value() = REBOOT_OK;
@@ -394,6 +421,49 @@ void MainWidget::setTime()
     emit checked();
 }
 
+void MainWidget::setEnableNewTimeZone()
+{
+    QString utc;
+    QRegExp r("[0-9][0-9]");
+    int pos = r.indexIn(ui->currentZoneTable->currentItem()->text());
+    if (pos > -1)
+    {
+         utc = r.cap();
+    }
+    else
+    {
+        qCritical() << "Ошибка при выборе ближайших зон";
+    }
+
+    int utc_num = utc.toInt();
+
+    ui->newZoneTable->clearContents();
+
+    int row(0);
+
+    QHash<QString, QString>::const_iterator i = newtimezonelist.constBegin();
+    while (i != newtimezonelist.constEnd())
+    {
+        if(i.key().contains(( utc_num <= 9 ) ? QString("0%1").arg(utc_num) : QString("%1").arg(utc_num))
+           || i.key().contains( ( (utc_num + 1) <= 9 ) ? QString("0%1").arg(utc_num + 1) : QString("%1").arg(utc_num + 1))
+           || i.key().contains( ( (utc_num + 2) <= 9 ) ? QString("0%1").arg(utc_num + 2) : QString("%1").arg(utc_num + 2))
+           || i.key().contains( ( (utc_num - 1) <= 9 ) ? QString("0%1").arg(utc_num - 1) : QString("%1").arg(utc_num - 1))
+           || i.key().contains( ( (utc_num - 2) <= 9 ) ? QString("0%1").arg(utc_num - 2) : QString("%1").arg(utc_num - 2)))
+        {
+            QTableWidgetItem *newItem = new QTableWidgetItem(i.key());
+            ui->newZoneTable->setItem(row, 0, newItem);
+            ++row;
+        }
+        ++i;
+    }
+    ui->newZoneTable->sortItems(0);
+
+    if(!ui->newZoneTable->isEnabled())
+    {
+        ui->newZoneTable->setEnabled(true);
+    }
+}
+
 bool MainWidget::execCommand(const QString __command,
                              const QStringList __args,
                              QByteArray &__output)
@@ -430,6 +500,8 @@ void MainWidget::procEvent(int pause)
 bool MainWidget::createSetTimezoneScript(const QString __zone_name) const
 {
     QFile file(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("extra")
                .append(QDir::separator())
                .append("setnewtimezone.sh"));
 

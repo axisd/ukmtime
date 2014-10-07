@@ -27,15 +27,18 @@ private:
 
     Ui::MainWidget *ui;
     bool ipTested;
-    bool loadTimeZone();
+    bool loadTimeZone(const QString &__fileName, QHash<QString,QString> &__hashList);
+    void updateTimeZoneTables();
+
     bool loadIPList();
     void addLog(const QString __log_string) const;
 
-    void updateIpStausTable();
+    void updateIpStatusTable();
 
     QString getHostIpStatus(HostIpStatus __status) const;
 
-    QHash<QString,QString> timezonelist;
+    QHash<QString,QString> currenttimezonelist;
+    QHash<QString,QString> newtimezonelist;
     QHash<QString,HostIpStatus> iplist;
 
     bool execCommand(const QString __command,
@@ -48,10 +51,11 @@ private:
 
 private slots:
     void setEnableButton();
-    void setEnableSetter();
-    void setDisableSetter();
+    void setEnableZonesBox();
+    void setDisableZonesBox();
     void testIp();
     void setTime();
+    void setEnableNewTimeZone();
 
 signals:
     void checking();

@@ -1,0 +1,16 @@
+(UTC+03) Калининград;Europe/Kaliningrad
+(UTC+04) Москва;Europe/Moscow
+(UTC+04) Волгоград;Europe/Volgograd
+(UTC+04) Удмуртская Республика/Самарская область;Europe/Samara
+(UTC+06) Екатеринбург;Asia/Yekaterinburg
+(UTC+07) Омск;Asia/Omsk
+(UTC+07) Новосибирск;Asia/Novosibirsk
+(UTC+07) Новокузнецк/Кемерово;Asia/Novokuznetsk
+(UTC+08) Красноярск;Asia/Krasnoyarsk
+(UTC+09) Иркутск;Asia/Irkutsk
+(UTC+10) Якутск;Asia/Yakutsk
+(UTC+11) Владивосток;Asia/Vladivostok
+(UTC+11) Сахалин;Asia/Sakhalin
+(UTC+12) Магадан;Asia/Magadan
+(UTC+12) Камчатский край;Asia/Kamchatka
+(UTC+12) Чукотский Автономный Округ/Анадырь;Asia/Anadyr
