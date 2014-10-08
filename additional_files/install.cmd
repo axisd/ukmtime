@@ -13,16 +13,9 @@ echounix " ************************************ "
 echounix "	==== INSTALL.CMD ==== "
 
 echounix "Check and mkdir %remote_dir% at %host%"
-plink -batch -pw xxxxxx root@%host% mkdir %remote_dir%
-IF %ERRORLEVEL% NEQ 0 ( 
-	echounix "Dir %remote_dir% at %host% already exist"
-	echounix "Remove dir %remote_dir% at %host%"
-	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%;rm -Rf %remote_dir%;mkdir %remote_dir%
-	IF %ERRORLEVEL% NEQ 0 GOTO error
-	echounix "Remove dir %remote_dir% at %host% success"
-) else (	
-	echounix "Create dir success"
-)
+plink -batch -pw xxxxxx root@%host% if [ -d %remote_dir% ]; then rm -fr %remote_dir%/*; else mkdir %remote_dir%; fi
+IF %ERRORLEVEL% NEQ 0 GOTO error
+echounix "Check %remote_dir% SUCCESS"
 
 echounix "Copy file %file_to_transfer% to %host%"
 pscp -batch -pw xxxxxx %file_to_transfer% root@%host%:%remote_dir%
