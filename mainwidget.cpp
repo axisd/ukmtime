@@ -26,6 +26,7 @@ MainWidget::MainWidget(QWidget *parent) :
     updateTimeZoneTables();
 
     connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableNewTimeZone()));
+    connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setDisableButton()));
     connect(ui->newZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableButton()));
 
     connect(this, SIGNAL(checked()), this, SLOT(setEnableZonesBox()));
@@ -267,6 +268,14 @@ void MainWidget::setEnableButton()
     }
 }
 
+void MainWidget::setDisableButton()
+{
+    if(ui->setButton->isEnabled())
+    {
+        ui->setButton->setDisabled(true);
+    }
+}
+
 void MainWidget::setEnableZonesBox()
 {
     if(!ui->zonesBox->isEnabled())
@@ -338,7 +347,7 @@ void MainWidget::testIp()
 
 void MainWidget::setTime()
 {
-    if(!createSetTimezoneScript( newtimezonelist.value( ui->newZoneTable->currentItem()->text() ) ))
+    if(!createSetTimezoneScript( newtimezonelist.value( ui->newZoneTable->currentItem()->text() ) , "newzone.sh", "setnewzone.sh"))
     {
         qCritical() << "Создание скрипта с новой зоной - FAIL";
         return;
@@ -346,6 +355,29 @@ void MainWidget::setTime()
     else
     {
         qDebug() << "Создание скрипта с новой зоной - OK";
+    }
+
+    if(!createSetTimezoneScript( currenttimezonelist.value( ui->currentZoneTable->currentItem()->text() ) , "curzone.sh", "setcurzone.sh"))
+    {
+        qCritical() << "Создание скрипта с текущей зоной - FAIL";
+        return;
+    }
+    else
+    {
+        qDebug() << "Создание скрипта с текущей зоной - OK";
+    }
+
+    if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка временной зоны"),
+                                    tr("Выбранная текущия зона: %1.\n"
+                                       "Выбранная новая зона:   %2.\n"
+                                       "Вы уверены?")
+                                                   .arg(ui->currentZoneTable->currentItem()->text())
+                                                   .arg(ui->newZoneTable->currentItem()->text()),
+                                    QMessageBox::Ok
+                                    | QMessageBox::Cancel,
+                                    QMessageBox::Cancel))
+    {
+        return;
     }
 
     emit checking();
@@ -356,7 +388,7 @@ void MainWidget::setTime()
         if(i.value() == ONLINE)
         {
             QStringList args_list;
-            args_list << "/C" << "extra/install.cmd" << i.key();
+            args_list << "/C" << "install.cmd" << i.key();
 
             qDebug() << QString("Старт скрипта работы с %1").arg(i.key());
             qDebug() << "cmd.exe" << args_list;
@@ -381,7 +413,7 @@ void MainWidget::setTime()
                                   << "-pw" << "xxxxxx"
                                   << addr
                                   << "reboot";
-                        if(execCommand("extra/plink.exe", args_list, output))
+                        if(execCommand("plink.exe", args_list, output))
                         {
                             qDebug() << QString("Результат перезагрузки - OK");
                             i.value() = REBOOT_OK;
@@ -396,15 +428,14 @@ void MainWidget::setTime()
                 else
                 {
                     qDebug() << QString("Результат инсталяции - FAIL");
+                    qDebug() << "Результат: " << output;
                     i.value() = INSTALL_FAIL;
                 }
             }
             else
             {
                 i.value() = INSTALL_FAIL;
-            }
-
-            qDebug() << "Результат: " << output;
+            }            
 
             QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
             if(listI.size() > 0)
@@ -417,8 +448,6 @@ void MainWidget::setTime()
 
         procEvent(100);
     }
-
-    emit checked();
 }
 
 void MainWidget::setEnableNewTimeZone()
@@ -471,7 +500,7 @@ bool MainWidget::execCommand(const QString __command,
     QProcess proc;
     qDebug() << "Команда" << __command << __args;
 
-    proc.setWorkingDirectory(qApp->applicationDirPath());
+    proc.setWorkingDirectory(qApp->applicationDirPath().append(QDir::separator()).append("extra"));
     proc.start(__command, __args);
 
     if (!proc.waitForStarted())
@@ -497,13 +526,13 @@ void MainWidget::procEvent(int pause)
     tELoop->exec();
 }
 
-bool MainWidget::createSetTimezoneScript(const QString __zone_name) const
+bool MainWidget::createSetTimezoneScript(const QString &__zone_name, const QString &__filename, const QString &_execScript) const
 {
     QFile file(qApp->applicationDirPath()
                .append(QDir::separator())
                .append("extra")
                .append(QDir::separator())
-               .append("setnewtimezone.sh"));
+               .append(__filename));
 
     if (!file.open(QIODevice::WriteOnly))
     {
@@ -514,12 +543,12 @@ bool MainWidget::createSetTimezoneScript(const QString __zone_name) const
     QTextStream out(&file);
 
     out << QString("#!/bin/sh\n\n")
-        << QString("echo \" Starting setzone.sh with zone %1 (`date`)\"\n").arg(__zone_name)
-        << QString("/usr/local/ukmtimeup/./setzone.sh %1\n").arg(__zone_name);
+        << QString("echo \" Starting %1 with zone %2 (`date`)\"\n").arg(_execScript).arg(__zone_name)
+        << QString("/usr/local/ukmtimeup/%1 %2\n").arg(_execScript).arg(__zone_name);
 
     file.close();
 
-    qDebug() << "Создание файла setnewtimezone.sh - Успешно";
+    qDebug() << QString("Создание файла %1 - Успешно").arg(_execScript);
 
     return true;
 }

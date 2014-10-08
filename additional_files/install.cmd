@@ -3,7 +3,8 @@
 set host=%1
 set remote_dir=/usr/local/ukmtimeup
 set file_to_transfer=timezone_patch.zip
-set script_to_transfer=setnewtimezone.sh
+set script_1_to_transfer=newzone.sh
+set script_2_to_transfer=curzone.sh
 set remote_script=install.sh
 
 echounix
@@ -17,6 +18,7 @@ IF %ERRORLEVEL% NEQ 0 (
 	echounix "Dir %remote_dir% at %host% already exist"
 	echounix "Remove dir %remote_dir% at %host%"
 	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%
+	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%
 	IF %ERRORLEVEL% NEQ 0 GOTO error
 	echounix "Remove dir %remote_dir% at %host% success"
 ) else (	
@@ -28,8 +30,13 @@ pscp -batch -pw xxxxxx %file_to_transfer% root@%host%:%remote_dir%
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "Copy file success"
 
-echounix "Copy file %script_to_transfer% to %host%"
-pscp -batch -pw xxxxxx %script_to_transfer% root@%host%:%remote_dir%
+echounix "Copy file %script_1_to_transfer% to %host%"
+pscp -batch -pw xxxxxx %script_1_to_transfer% root@%host%:%remote_dir%
+IF %ERRORLEVEL% NEQ 0 GOTO error
+echounix "Copy file success"
+
+echounix "Copy file %script_2_to_transfer% to %host%"
+pscp -batch -pw xxxxxx %script_2_to_transfer% root@%host%:%remote_dir%
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "Copy file success"
 

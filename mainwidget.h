@@ -47,10 +47,11 @@ private:
 
     void procEvent(int pause);
 
-    bool createSetTimezoneScript(const QString __zone_name) const;
+    bool createSetTimezoneScript(const QString &__zone_name, const QString &__filename, const QString &_execScript) const;
 
 private slots:
     void setEnableButton();
+    void setDisableButton();
     void setEnableZonesBox();
     void setDisableZonesBox();
     void testIp();

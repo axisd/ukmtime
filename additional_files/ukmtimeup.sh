@@ -7,7 +7,7 @@ start()
 	logger -t ukmtimeup "$0: start() begin"
 	if [[ $(eval "$time") -ge 1410260200 ]]; then
 		logger -t ukmtimeup "$0: Time to update zone"
-		$basedir/setnewtimezone.sh >> /var/log/ukmtimeup.log
+		$basedir/newzone.sh >> /var/log/ukmtimeup.log
 		if [ $? -ne 0 ]; then
 			logger -t ukmtimeup "$0: Update zone fail"
 		else

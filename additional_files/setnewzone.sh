@@ -77,7 +77,7 @@ echo `ls -l /etc/localtime`
 
 echo " Compare old timezone and new timezone "
 # Проверяем, изменилась ли зона
-if [[ "$NEWZONE" -ne "$CURZONE" ]]; then
+if [ "$NEWZONE" != "$CURZONE" ]; then
 	echo " Timezone was changed "
 	# Зона изменилась
 	echo " Reset time "
