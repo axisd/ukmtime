@@ -37,24 +37,18 @@ if [ "$NEWZONE" == "$CURZONE" ]; then
 	exit 0
 fi
 
-# Подключаем функции детектирования, остановки и запуска УКМ
-. /usr/local/ukmtimeup/detectnreboot_func.sh
-
-echo " Detect runnig ukmclient "
-pos_program_detect
-result
-echo " Detect runnig ukmclient success "
-
-echo " Stop ukmclient "
-pos_program_stop
-result
-echo " Stop ukmclient success "
-
 echo " Backup /etc/localtime "
 # На всякий случай делаем резервную копию файла с текущими настройками
-mv /etc/localtime  /etc/localtime.2011
+if [ -f "/etc/localtime.2011_1" ]; then
+	echo " /etc/localtime.2011_1 already backup. Remove old backup "
+	rm -Rf /etc/localtime.2011_1
+	result
+	echo " Remove old backup success "
+fi
+
+mv /etc/localtime  /etc/localtime.2011_1
 result
-echo " Backup file is /etc/localtime.2011 "
+echo " Backup file is /etc/localtime.2011_1 "
 
 echo " Create symlink fon nem timezone "
 # Создаем символическую ссылку на нужный нам timezone: 
@@ -73,17 +67,11 @@ echo " Removing /etc/adjtime "
 rm -fv /etc/adjtime
 result
 
-echo "hwclock flags=$CLOCKFLAGS"
 echo "Writing system time to hw clock"
 /sbin/hwclock --systohc
 result
 
 echo "System time is set to:  `/sbin/hwclock --show`"
-
-echo " Start ukmclient "
-pos_program_start
-result
-echo " Start ukmclient success "
 
 echo "==== SUCCESS: $0 completed $(date)"
 echo "****************************************"

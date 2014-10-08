@@ -29,22 +29,50 @@ echo " Current timezone is $CURZONE "
 
 echo " Backup /etc/localtime "
 # На всякий случай делаем резервную копию файла с текущими настройками
-mv /etc/localtime  /etc/localtime.2011
+if [ -f "/etc/localtime.2011_2" ]; then
+	echo " /etc/localtime already backup. Remove old backup "
+	rm -Rf /etc/localtime.2011_2
+	result
+	echo " Remove old backup success "
+fi
+
+mv /etc/localtime  /etc/localtime.2011_2
 result
-echo " Backup file is /etc/localtime.2011 "
+echo " Backup file is /etc/localtime.2011_2 "
 
 echo " Backup zoneinfo files "
+if [ -d "/usr/share/zoneinfo-posix.2011" ]; then
+	echo " /usr/share/zoneinfo-posix already backup. Remove old backup "
+	rm -Rf /usr/share/zoneinfo-posix.2011
+	result
+	echo " Remove old backup /usr/share/zoneinfo-posix success "
+fi
+
 echo " Move /usr/share/zoneinfo-posix to zoneinfo-posix.2011 "
 # Перемещаем старую папку zoneinfo-posix
 mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix.2011
 result
 echo " Move /usr/share/zoneinfo-posix success "
 
+if [ -d "/usr/share/zoneinfo.2011" ]; then
+	echo " /usr/share/zoneinfo already backup. Remove old backup "
+	rm -Rf /usr/share/zoneinfo.2011
+	result
+	echo " Remove old backup /usr/share/zoneinfo success "
+fi
+
 echo " Move /usr/share/zoneinfo to zoneinfo.2011 "
 # Перемещаем старую папку zoneinfo
 mv /usr/share/zoneinfo /usr/share/zoneinfo.2011
 result
 echo " Move /usr/share/zoneinfo success "
+
+if [ -d "/usr/share/zoneinfo-leaps.2011" ]; then
+	echo " /usr/share/zoneinfo-leaps already backup. Remove old backup "
+	rm -Rf /usr/share/zoneinfo-leaps.2011
+	result
+	echo " Remove old backup /usr/share/zoneinfo-leaps success "
+fi
 
 echo " Move /usr/share/zoneinfo-leaps to zoneinfo-leaps.2011 "
 # Перемещаем старую папку zoneinfo-leaps
@@ -62,7 +90,7 @@ echo " Copy new zoneinfo success"
 
 echo " Create sym-link /usr/share/zoneinfo-posix "
 # Вместо неё будет симлинк на папку zoneinfo
-ln -s /usr/share/zoneinfo /usr/share/zoneinfo-posix
+ln -sf /usr/share/zoneinfo /usr/share/zoneinfo-posix
 result
 echo " Create sym-link /usr/share/zoneinfo-posix success "
 

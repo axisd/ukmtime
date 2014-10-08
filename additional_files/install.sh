@@ -68,9 +68,5 @@ mkdir $BASE_FOLDER/$TMP_DIR
 tar -xzf $BASE_FOLDER/$ZONE_ARCH -C $BASE_FOLDER/$TMP_DIR
 result
 
-echo " Correct current timezone "
-$BASE_FOLDER/curzone.sh
-result
-
 echo "Success"
 echo "****************************************"

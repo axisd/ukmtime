@@ -42,7 +42,7 @@
            </attribute>
            <column>
             <property name="text">
-             <string>Зона</string>
+             <string>Часовой пояс</string>
             </property>
            </column>
           </widget>
@@ -78,7 +78,7 @@
            </attribute>
            <column>
             <property name="text">
-             <string>Зона</string>
+             <string>Часовой пояс</string>
             </property>
            </column>
           </widget>

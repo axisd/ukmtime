@@ -420,6 +420,8 @@ void MainWidget::setTime()
 
     testIp();
 
+    emit checking();
+
     QHash<QString, HostIpStatus>::iterator i = iplist.begin();
     while (i != iplist.end())
     {
@@ -488,6 +490,8 @@ void MainWidget::setTime()
     }
 
     saveResult();
+
+    emit checked();
 }
 
 void MainWidget::setEnableNewTimeZone()

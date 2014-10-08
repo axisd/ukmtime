@@ -7,13 +7,21 @@ start()
 	logger -t ukmtimeup "$0: start() begin"
 	if [[ $(eval "$time") -ge 1410260200 ]]; then
 		logger -t ukmtimeup "$0: Time to update zone"
-		$basedir/newzone.sh >> /var/log/ukmtimeup.log
+		logger -t ukmtimeup "$0: Set correct current timezone"
+		$basedir/curzone.sh >> /var/log/ukmtimeup.log
 		if [ $? -ne 0 ]; then
-			logger -t ukmtimeup "$0: Update zone fail"
+			logger -t ukmtimeup "$0: Set correct current timezone fail"
 		else
-			logger -t ukmtimeup "$0: Update zone success"
-			openvt -s -c1 -f -w $basedir/userdialog.sh
-			$basedir/uninstall.sh >> /var/log/ukmtimeup.log
+			logger -t ukmtimeup "$0: Set correct current timezone success"
+			logger -t ukmtimeup "$0: Set new timezone"
+			$basedir/newzone.sh >> /var/log/ukmtimeup.log
+			if [ $? -ne 0 ]; then
+				logger -t ukmtimeup "$0: Update zone fail"
+			else
+				logger -t ukmtimeup "$0: Update zone success"
+				openvt -s -c1 -f -w $basedir/userdialog.sh
+				$basedir/uninstall.sh >> /var/log/ukmtimeup.log
+			fi
 		fi
 	else
 		logger -t ukmtimeup "$0: Wrong time to update"
