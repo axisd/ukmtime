@@ -23,6 +23,13 @@ else
 	result
 fi
 
+if [ -f "/etc/rc5.d/$KFILE" ]; then
+	echo " /etc/rc5.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$SFILE
+	result
+fi
+
 echo "Install UkmTimeUp autorun Stop scripts"
 if [ -f "/etc/rc0.d/$KFILE" ]; then
 	echo " /etc/rc0.d/$KFILE already exist "
@@ -49,13 +56,6 @@ if [ -f "/etc/rc4.d/$KFILE" ]; then
 	echo " /etc/rc4.d/$KFILE already exist "
 else
 	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc4.d/$KFILE
-	result
-fi
-
-if [ -f "/etc/rc5.d/$KFILE" ]; then
-	echo " /etc/rc5.d/$KFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$KFILE
 	result
 fi
 

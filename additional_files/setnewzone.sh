@@ -29,28 +29,28 @@ echo " Current timezone is $CURZONE "
 
 echo " Backup /etc/localtime "
 # На всякий случай делаем резервную копию файла с текущими настройками
-mv /etc/localtime  /etc/localtime-old
+mv /etc/localtime  /etc/localtime.2011
 result
-echo " Backup file is /etc/localtime-old "
+echo " Backup file is /etc/localtime.2011 "
 
 echo " Backup zoneinfo files "
-echo " Move /usr/share/zoneinfo-posix "
+echo " Move /usr/share/zoneinfo-posix to zoneinfo-posix.2011 "
 # Перемещаем старую папку zoneinfo-posix
-mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix.2014
+mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix.2011
 result
 echo " Move /usr/share/zoneinfo-posix success "
 
-echo " Move /usr/share/zoneinfo "
+echo " Move /usr/share/zoneinfo to zoneinfo.2011 "
 # Перемещаем старую папку zoneinfo
-mv /usr/share/zoneinfo /usr/share/zoneinfo.2014
+mv /usr/share/zoneinfo /usr/share/zoneinfo.2011
 result
 echo " Move /usr/share/zoneinfo success "
 
-echo " Remove /usr/share/zoneinfo-leaps "
-# Перемещаем старую папку zoneinfo-posix
-mv /usr/share/zoneinfo-leaps /usr/share/zoneinfo-leaps.2014
+echo " Move /usr/share/zoneinfo-leaps to zoneinfo-leaps.2011 "
+# Перемещаем старую папку zoneinfo-leaps
+mv /usr/share/zoneinfo-leaps /usr/share/zoneinfo-leaps.2011
 result
-echo " Remove /usr/share/zoneinfo-leaps success "
+echo " Move /usr/share/zoneinfo-leaps success "
 
 echo " Copy new zoneinfo "
 # Копируем новые файлы зон, утилиты, маны и библиотеку
@@ -74,18 +74,6 @@ echo " Create symlink fon nem timezone "
 ln -sf /usr/share/zoneinfo/$NEWZONE /etc/localtime
 result
 echo `ls -l /etc/localtime`
-
-echo " Compare old timezone and new timezone "
-# Проверяем, изменилась ли зона
-if [ "$NEWZONE" != "$CURZONE" ]; then
-	echo " Timezone was changed "
-	# Зона изменилась
-	echo " Reset time "
-	# Восстанавливаем сохраненное время
-	date "+%Y/%m/%d %H:%M:%S" --set="$CURDATETIME"
-	result
-	echo " Current time `date` "
-fi
 
 # We need to to remove /etc/adjtime to force hwclock set hardware clock
 echo " Removing /etc/adjtime "

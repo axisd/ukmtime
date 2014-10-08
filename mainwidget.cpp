@@ -15,7 +15,6 @@ MainWidget::MainWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->setButton->setDisabled(true);
-    ui->zonesBox->setDisabled(true);
     ui->newZoneTable->setDisabled(true);
 
     loadIPList();
@@ -26,11 +25,13 @@ MainWidget::MainWidget(QWidget *parent) :
     updateTimeZoneTables();
 
     connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableNewTimeZone()));
-    connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setDisableButton()));
-    connect(ui->newZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableButton()));
+    connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setDisableSetButton()));
+    connect(ui->newZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableSetButton()));
 
-    connect(this, SIGNAL(checked()), this, SLOT(setEnableZonesBox()));
     connect(this, SIGNAL(checking()), this, SLOT(setDisableZonesBox()));
+    connect(this, SIGNAL(checked()), this, SLOT(setEnableZonesBox()));
+    connect(this, SIGNAL(checking()), this, SLOT(setDisableTestButton()));
+    connect(this, SIGNAL(checked()), this, SLOT(setEnableTestButton()));
 
     connect(ui->testButton, SIGNAL(clicked()), this, SLOT(testIp()));
     connect(ui->setButton, SIGNAL(clicked()), this, SLOT(setTime()));
@@ -260,7 +261,7 @@ QString MainWidget::getHostIpStatus(MainWidget::HostIpStatus __status) const
     return decodingStatus;
 }
 
-void MainWidget::setEnableButton()
+void MainWidget::setEnableSetButton()
 {
     if(!ui->setButton->isEnabled())
     {
@@ -268,11 +269,27 @@ void MainWidget::setEnableButton()
     }
 }
 
-void MainWidget::setDisableButton()
+void MainWidget::setDisableSetButton()
 {
     if(ui->setButton->isEnabled())
     {
         ui->setButton->setDisabled(true);
+    }
+}
+
+void MainWidget::setEnableTestButton()
+{
+    if(!ui->testButton->isEnabled())
+    {
+        ui->testButton->setEnabled(true);
+    }
+}
+
+void MainWidget::setDisableTestButton()
+{
+    if(ui->testButton->isEnabled())
+    {
+        ui->testButton->setDisabled(true);
     }
 }
 
@@ -347,29 +364,35 @@ void MainWidget::testIp()
 
 void MainWidget::setTime()
 {
-    if(!createSetTimezoneScript( newtimezonelist.value( ui->newZoneTable->currentItem()->text() ) , "newzone.sh", "setnewzone.sh"))
+    if(!createSetTimezoneScript( newtimezonelist.value( ui->newZoneTable->currentItem()->text() ),
+                                 "newzone.tpl",
+                                 "newzone.sh",
+                                 "setnewzone.sh"))
     {
-        qCritical() << "Создание скрипта с новой зоной - FAIL";
+        qCritical() << "Создание скрипта с новым часовым поясом - FAIL";
         return;
     }
     else
     {
-        qDebug() << "Создание скрипта с новой зоной - OK";
+        qDebug() << "Создание скрипта с новым часовым поясом - OK";
     }
 
-    if(!createSetTimezoneScript( currenttimezonelist.value( ui->currentZoneTable->currentItem()->text() ) , "curzone.sh", "setcurzone.sh"))
+    if(!createSetTimezoneScript( currenttimezonelist.value( ui->currentZoneTable->currentItem()->text() ),
+                                 "curzone.tpl",
+                                 "curzone.sh",
+                                 "setcurzone.sh"))
     {
-        qCritical() << "Создание скрипта с текущей зоной - FAIL";
+        qCritical() << "Создание скрипта с текущим новым часовым поясом - FAIL";
         return;
     }
     else
     {
-        qDebug() << "Создание скрипта с текущей зоной - OK";
+        qDebug() << "Создание скрипта с текущим новым часовым поясом - OK";
     }
 
-    if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка временной зоны"),
-                                    tr("Выбранная текущия зона: %1.\n"
-                                       "Выбранная новая зона:   %2.\n"
+    if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка часового пояса"),
+                                    tr("Выбранный часовой пояс:\n%1.\n\n"
+                                       "Выбранный часовой пояс:\n%2.\n\n\n"
                                        "Вы уверены?")
                                                    .arg(ui->currentZoneTable->currentItem()->text())
                                                    .arg(ui->newZoneTable->currentItem()->text()),
@@ -380,7 +403,22 @@ void MainWidget::setTime()
         return;
     }
 
-    emit checking();
+    if(ui->rebootCheckBox->isChecked())
+    {
+        if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка часового пояса"),
+                                                       tr("Установлена опция перезагрузки после установки!\n\n\n"
+                                                          "Вы уверены?")
+                                                       .arg(ui->currentZoneTable->currentItem()->text())
+                                                       .arg(ui->newZoneTable->currentItem()->text()),
+                                                       QMessageBox::Ok
+                                                       | QMessageBox::Cancel,
+                                                       QMessageBox::Cancel))
+        {
+            return;
+        }
+    }
+
+    testIp();
 
     QHash<QString, HostIpStatus>::iterator i = iplist.begin();
     while (i != iplist.end())
@@ -448,44 +486,49 @@ void MainWidget::setTime()
 
         procEvent(100);
     }
+
+    saveResult();
 }
 
 void MainWidget::setEnableNewTimeZone()
 {
-    QString utc;
-    QRegExp r("[0-9][0-9]");
-    int pos = r.indexIn(ui->currentZoneTable->currentItem()->text());
-    if (pos > -1)
+    QStringList zone_name_list = ui->currentZoneTable->currentItem()->text().split(")", QString::SkipEmptyParts);
+
+    if(zone_name_list.size() != 2)
     {
-         utc = r.cap();
+        qCritical() << "Ошибка фильтрации временных поясов";
     }
     else
     {
-        qCritical() << "Ошибка при выборе ближайших зон";
-    }
+        QString zone_name = zone_name_list.at(1),
+                additional_zone_name("Неизвестный пояс");
 
-    int utc_num = utc.toInt();
-
-    ui->newZoneTable->clearContents();
-
-    int row(0);
-
-    QHash<QString, QString>::const_iterator i = newtimezonelist.constBegin();
-    while (i != newtimezonelist.constEnd())
-    {
-        if(i.key().contains(( utc_num <= 9 ) ? QString("0%1").arg(utc_num) : QString("%1").arg(utc_num))
-           || i.key().contains( ( (utc_num + 1) <= 9 ) ? QString("0%1").arg(utc_num + 1) : QString("%1").arg(utc_num + 1))
-           || i.key().contains( ( (utc_num + 2) <= 9 ) ? QString("0%1").arg(utc_num + 2) : QString("%1").arg(utc_num + 2))
-           || i.key().contains( ( (utc_num - 1) <= 9 ) ? QString("0%1").arg(utc_num - 1) : QString("%1").arg(utc_num - 1))
-           || i.key().contains( ( (utc_num - 2) <= 9 ) ? QString("0%1").arg(utc_num - 2) : QString("%1").arg(utc_num - 2)))
+        if(zone_name.contains(tr("Якутск")))
         {
-            QTableWidgetItem *newItem = new QTableWidgetItem(i.key());
-            ui->newZoneTable->setItem(row, 0, newItem);
-            ++row;
+            additional_zone_name = tr("Чита");
         }
-        ++i;
+        if(zone_name.contains(tr("Магадан")))
+        {
+            additional_zone_name = tr("Среднеколымск");
+        }
+
+        ui->newZoneTable->clearContents();
+
+        int row(0);
+
+        QHash<QString, QString>::const_iterator i = newtimezonelist.constBegin();
+        while (i != newtimezonelist.constEnd())
+        {
+            if(i.key().contains(zone_name) || i.key().contains(additional_zone_name))
+            {
+                QTableWidgetItem *newItem = new QTableWidgetItem(i.key());
+                ui->newZoneTable->setItem(row, 0, newItem);
+                ++row;
+            }
+            ++i;
+        }
+        ui->newZoneTable->sortItems(0);
     }
-    ui->newZoneTable->sortItems(0);
 
     if(!ui->newZoneTable->isEnabled())
     {
@@ -526,29 +569,125 @@ void MainWidget::procEvent(int pause)
     tELoop->exec();
 }
 
-bool MainWidget::createSetTimezoneScript(const QString &__zone_name, const QString &__filename, const QString &_execScript) const
+bool MainWidget::createSetTimezoneScript(const QString &__zone_name,
+                                         const QString &__tpl_filename,
+                                         const QString &__out_filename,
+                                         const QString &__execScript) const
 {
-    QFile file(qApp->applicationDirPath()
+    QFile file_in(qApp->applicationDirPath()
                .append(QDir::separator())
                .append("extra")
                .append(QDir::separator())
-               .append(__filename));
+               .append(__tpl_filename));
 
-    if (!file.open(QIODevice::WriteOnly))
+    if (!file_in.open(QIODevice::ReadWrite))
     {
-        qCritical() << QString("Невозможно открыть файл: %1").arg(file.fileName());
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file_in.fileName());
         return false;
     }
 
-    QTextStream out(&file);
+    QTextStream in(&file_in);
+    QString fil = in.readAll();
 
-    out << QString("#!/bin/sh\n\n")
-        << QString("echo \" Starting %1 with zone %2 (`date`)\"\n").arg(_execScript).arg(__zone_name)
-        << QString("/usr/local/ukmtimeup/%1 %2\n").arg(_execScript).arg(__zone_name);
+    file_in.close();
 
-    file.close();
+    QFile file_out(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("extra")
+               .append(QDir::separator())
+               .append(__out_filename));
 
-    qDebug() << QString("Создание файла %1 - Успешно").arg(_execScript);
+    if (!file_out.open(QIODevice::WriteOnly))
+    {
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file_out.fileName());
+        return false;
+    }
+
+    QTextStream out(&file_out);
+    out << fil.arg(__execScript).arg(__zone_name);
+
+    file_out.close();
+
+    qDebug() << QString("Создание файла %1 - Успешно").arg(__execScript);
 
     return true;
+}
+
+void MainWidget::saveResult()
+{
+    QFile file_success(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("iplist.txt.success"));
+
+    QFile file_fail(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("iplist.txt.fail"));
+
+    QFile file_offline(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("iplist.txt.offline"));
+
+    if (!file_success.open(QIODevice::WriteOnly))
+    {
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file_success.fileName());
+        return;
+    }
+
+    if (!file_fail.open(QIODevice::WriteOnly))
+    {
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file_fail.fileName());
+        return;
+    }
+
+    if (!file_offline.open(QIODevice::WriteOnly))
+    {
+        qCritical() << QString("Невозможно открыть файл: %1").arg(file_offline.fileName());
+        return;
+    }
+
+    QTextStream success(&file_success);
+    QTextStream fail(&file_fail);
+    QTextStream offline(&file_offline);
+
+    QHash<QString, HostIpStatus>::iterator i = iplist.begin();
+    while (i != iplist.end())
+    {
+        if( (i.value() == OFFLINE) ||(i.value() == NA) )
+        {
+            offline << i.key() << "\n";
+        }
+
+        if( (i.value() == MKDIR_FAIL)
+            || (i.value() == UNZIP_FAIL)
+            || (i.value() == CHMOD_FAIL)
+            || (i.value() == INSTALL_FAIL)
+            || (i.value() == REBOOT_FAIL) )
+        {
+            fail << i.key() << "\n";
+        }
+
+        if( (i.value() == INSTALL_OK) || (i.value() == REBOOT_OK) )
+        {
+            success << i.key() << "\n";
+        }
+
+        ++i;
+    }
+
+    file_success.close();
+    file_fail.close();
+    file_offline.close();
+
+    QMessageBox::information(this,
+                         tr("Сообщение"),
+                         tr("Результат работы сохранён\n\n"
+                            "Список IP касс\n"
+                            "* С успешной установкой: %1\n"
+                            "* С ошибкой во время установки: %2\n"
+                            "* На которые установка не производилась: %3\n")
+                      .arg(file_success.fileName())
+                      .arg(file_fail.fileName())
+                      .arg(file_offline.fileName()),
+                         QMessageBox::Ok
+                         );
 }

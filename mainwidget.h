@@ -47,13 +47,20 @@ private:
 
     void procEvent(int pause);
 
-    bool createSetTimezoneScript(const QString &__zone_name, const QString &__filename, const QString &_execScript) const;
+    bool createSetTimezoneScript(const QString &__zone_name, const QString &__tpl_filename, const QString &__out_filename, const QString &__execScript) const;
+
+    void saveResult();
 
 private slots:
-    void setEnableButton();
-    void setDisableButton();
+    void setEnableSetButton();
+    void setDisableSetButton();
+
+    void setEnableTestButton();
+    void setDisableTestButton();
+
     void setEnableZonesBox();
     void setDisableZonesBox();
+
     void testIp();
     void setTime();
     void setEnableNewTimeZone();

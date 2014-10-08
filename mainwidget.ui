@@ -11,19 +11,19 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>UKMTimeUp</string>
+   <string>УКМ4 Перевод времени 2014</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="2" column="1">
     <widget class="QGroupBox" name="zonesBox">
      <property name="title">
-      <string>Установка временной хоны</string>
+      <string>Установка часового пояса</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QGroupBox" name="currentBox">
         <property name="title">
-         <string>Зона до 26 октября 2014 года</string>
+         <string>Часовой пояс до 26 октября 2014 года</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
@@ -53,7 +53,7 @@
       <item>
        <widget class="QGroupBox" name="newBox">
         <property name="title">
-         <string>Зона после 26 октября 2014 года</string>
+         <string>Часовой пояс после 26 октября 2014 года</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>

@@ -31,17 +31,30 @@ NEWZONE="$1"
 echo " New timezone is $NEWZONE "
 
 if [ "$NEWZONE" == "$CURZONE" ]; then
-	echo " Zones does not change "
+	echo " Zones does not change. Current zone $CURZONE, installed zone $NEWZONE "
 	echo "==== SUCCESS: $0 completed $(date)"
 	echo "****************************************"
 	exit 0
 fi
 
+# Подключаем функции детектирования, остановки и запуска УКМ
+. /usr/local/ukmtimeup/detectnreboot_func.sh
+
+echo " Detect runnig ukmclient "
+pos_program_detect
+result
+echo " Detect runnig ukmclient success "
+
+echo " Stop ukmclient "
+pos_program_stop
+result
+echo " Stop ukmclient success "
+
 echo " Backup /etc/localtime "
 # На всякий случай делаем резервную копию файла с текущими настройками
-mv /etc/localtime  /etc/localtime-old
+mv /etc/localtime  /etc/localtime.2011
 result
-echo " Backup file is /etc/localtime-old "
+echo " Backup file is /etc/localtime.2011 "
 
 echo " Create symlink fon nem timezone "
 # Создаем символическую ссылку на нужный нам timezone: 
@@ -66,6 +79,11 @@ echo "Writing system time to hw clock"
 result
 
 echo "System time is set to:  `/sbin/hwclock --show`"
+
+echo " Start ukmclient "
+pos_program_start
+result
+echo " Start ukmclient success "
 
 echo "==== SUCCESS: $0 completed $(date)"
 echo "****************************************"
