@@ -23,8 +23,8 @@ else
 	result
 fi
 
-if [ -f "/etc/rc5.d/$KFILE" ]; then
-	echo " /etc/rc5.d/$KFILE already exist "
+if [ -f "/etc/rc5.d/$SFILE" ]; then
+	echo " /etc/rc5.d/$SFILE already exist "
 else
 	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$SFILE
 	result

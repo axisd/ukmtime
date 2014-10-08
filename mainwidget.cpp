@@ -14,7 +14,6 @@ MainWidget::MainWidget(QWidget *parent) :
     ipTested(false)
 {
     ui->setupUi(this);
-    ui->setButton->setDisabled(true);
     ui->newZoneTable->setDisabled(true);
 
     loadIPList();
@@ -25,7 +24,6 @@ MainWidget::MainWidget(QWidget *parent) :
     updateTimeZoneTables();
 
     connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableNewTimeZone()));
-    connect(ui->currentZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setDisableSetButton()));
     connect(ui->newZoneTable, SIGNAL(itemSelectionChanged()), this, SLOT(setEnableSetButton()));
 
     connect(this, SIGNAL(checking()), this, SLOT(setDisableZonesBox()));
@@ -364,6 +362,16 @@ void MainWidget::testIp()
 
 void MainWidget::setTime()
 {
+    if(!ui->currentZoneTable->currentItem() || !ui->newZoneTable->currentItem())
+    {
+        QMessageBox::warning(this,
+                             tr("Ошибка"),
+                             tr("Выберите текущий и новый часовой пояс"),
+                             QMessageBox::Ok
+                             );
+        return;
+    }
+
     if(!createSetTimezoneScript( newtimezonelist.value( ui->newZoneTable->currentItem()->text() ),
                                  "newzone.tpl",
                                  "newzone.sh",
@@ -391,9 +399,9 @@ void MainWidget::setTime()
     }
 
     if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка часового пояса"),
-                                    tr("Выбранный часовой пояс:\n%1.\n\n"
-                                       "Выбранный часовой пояс:\n%2.\n\n\n"
-                                       "Вы уверены?")
+                                    tr("Часовой пояс до 26.10.2014 02:00 :\n%1.\n\n"
+                                       "Часовой пояс после 26.10.2014 02:00 :\n%2.\n\n\n"
+                                       "Начать установку?")
                                                    .arg(ui->currentZoneTable->currentItem()->text())
                                                    .arg(ui->newZoneTable->currentItem()->text()),
                                     QMessageBox::Ok
@@ -406,8 +414,8 @@ void MainWidget::setTime()
     if(ui->rebootCheckBox->isChecked())
     {
         if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка часового пояса"),
-                                                       tr("Установлена опция перезагрузки после установки!\n\n\n"
-                                                          "Вы уверены?")
+                                                       tr("Внимание!\n\nВключена опция перезагрузки после установки!\n\n\n"
+                                                          "Продолжить?")
                                                        .arg(ui->currentZoneTable->currentItem()->text())
                                                        .arg(ui->newZoneTable->currentItem()->text()),
                                                        QMessageBox::Ok
@@ -453,7 +461,7 @@ void MainWidget::setTime()
                                   << "-pw" << "xxxxxx"
                                   << addr
                                   << "reboot";
-                        if(execCommand("plink.exe", args_list, output))
+                        if(execCommand("extra/plink.exe", args_list, output))
                         {
                             qDebug() << QString("Результат перезагрузки - OK");
                             i.value() = REBOOT_OK;
@@ -534,6 +542,8 @@ void MainWidget::setEnableNewTimeZone()
         ui->newZoneTable->sortItems(0);
     }
 
+    ui->newZoneTable->setCurrentCell(0, 0);
+
     if(!ui->newZoneTable->isEnabled())
     {
         ui->newZoneTable->setEnabled(true);
@@ -556,7 +566,7 @@ bool MainWidget::execCommand(const QString __command,
         return false;
     }
 
-    if (!proc.waitForFinished())
+    if (!proc.waitForFinished(60000))
     {
         qWarning() << "Таймаут при остановке. Прерывание процесса." << proc.readAllStandardOutput();
         return false;
@@ -621,15 +631,15 @@ void MainWidget::saveResult()
 {
     QFile file_success(qApp->applicationDirPath()
                .append(QDir::separator())
-               .append("iplist.txt.success"));
+               .append("success.iplist.txt"));
 
     QFile file_fail(qApp->applicationDirPath()
                .append(QDir::separator())
-               .append("iplist.txt.fail"));
+               .append("fail.iplist.txt"));
 
     QFile file_offline(qApp->applicationDirPath()
                .append(QDir::separator())
-               .append("iplist.txt.offline"));
+               .append("offline.iplist.txt"));
 
     if (!file_success.open(QIODevice::WriteOnly))
     {
@@ -664,13 +674,12 @@ void MainWidget::saveResult()
         if( (i.value() == MKDIR_FAIL)
             || (i.value() == UNZIP_FAIL)
             || (i.value() == CHMOD_FAIL)
-            || (i.value() == INSTALL_FAIL)
-            || (i.value() == REBOOT_FAIL) )
+            || (i.value() == INSTALL_FAIL) )
         {
             fail << i.key() << "\n";
         }
 
-        if( (i.value() == INSTALL_OK) || (i.value() == REBOOT_OK) )
+        if( (i.value() == INSTALL_OK) || (i.value() == REBOOT_OK) || (i.value() == REBOOT_FAIL))
         {
             success << i.key() << "\n";
         }
@@ -686,9 +695,9 @@ void MainWidget::saveResult()
                          tr("Сообщение"),
                          tr("Результат работы сохранён\n\n"
                             "Список IP касс\n"
-                            "* С успешной установкой: %1\n"
-                            "* С ошибкой во время установки: %2\n"
-                            "* На которые установка не производилась: %3\n")
+                            "\n* С успешной установкой: %1\n"
+                            "\n* С ошибкой во время установки: %2\n"
+                            "\n* На которые установка не производилась: %3\n")
                       .arg(file_success.fileName())
                       .arg(file_fail.fileName())
                       .arg(file_offline.fileName()),

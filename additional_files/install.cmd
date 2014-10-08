@@ -17,8 +17,7 @@ plink -batch -pw xxxxxx root@%host% mkdir %remote_dir%
 IF %ERRORLEVEL% NEQ 0 ( 
 	echounix "Dir %remote_dir% at %host% already exist"
 	echounix "Remove dir %remote_dir% at %host%"
-	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%
-	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%
+	plink -batch -pw xxxxxx root@%host% rm -Rf %remote_dir%;rm -Rf %remote_dir%;mkdir %remote_dir%
 	IF %ERRORLEVEL% NEQ 0 GOTO error
 	echounix "Remove dir %remote_dir% at %host% success"
 ) else (	

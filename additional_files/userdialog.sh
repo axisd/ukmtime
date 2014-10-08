@@ -41,6 +41,7 @@ read -n1 answer
 clear
 
 if [[ $answer -eq 1 ]]; then
+	ukmon
 	echo
 	echo "-----------------------------------------"
 	echo "Внимание!"
