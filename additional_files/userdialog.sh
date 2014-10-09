@@ -9,6 +9,7 @@ CURZONE=${LSLOCALTIME#*info/}
 
 setsysfont
 loadkeys -c -s /usr/local/ukmtimeup/ukm-sbrf.map
+setleds -D +num
 
 echo
 echo "-----------------------------------------"
@@ -102,3 +103,4 @@ fi
 
 . /etc/sysconfig/keyboard
 loadkeys $KEYTABLE
+setleds -D +num

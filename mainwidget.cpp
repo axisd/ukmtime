@@ -692,7 +692,7 @@ void MainWidget::saveResult()
     file_offline.close();
 
     QMessageBox::information(this,
-                         tr("Сообщение"),
+                         tr("Установка завершена"),
                          tr("Результат работы сохранён\n\n"
                             "Список IP касс\n"
                             "\n* С успешной установкой: %1\n"
