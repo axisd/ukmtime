@@ -43,8 +43,7 @@ XDialog::~XDialog()
 
 void XDialog::mainDialog()
 {
-    qDebug() << "*********************\n"
-             << " xuserdialog started ";
+    qDebug() << " **** xuserdialog started **** ";
     QString localtime = QFile::symLinkTarget("/etc/localtime");
     QString timezone = localtime.right(localtime.size() - localtime.indexOf("info/") - 5);
 
@@ -64,8 +63,7 @@ void XDialog::succDialog()
     if(m_continue)
     {
         execCommand("/usr/bin/ukmon");
-        qDebug() << " xuserdialog finished \n"
-                 << "*********************";
+        qDebug() << " **** xuserdialog finished **** ";
         this->close();
     }
     else
@@ -86,8 +84,7 @@ void XDialog::failDialog()
     if(m_continue)
     {
         execCommand("/usr/bin/ukmoff");
-        qDebug() << " xuserdialog finished \n"
-                 << "*********************";
+        qDebug() << " **** xuserdialog finished **** ";
         this->close();
     }
     else
@@ -107,19 +104,19 @@ bool XDialog::execCommand(const QString __command,
                           const QStringList __args) const
 {
     QProcess proc;
-    qDebug() << "Command" << __command << __args;
+    qDebug() << " Command " << __command << __args;
 
     proc.start(__command, __args);
 
     if (!proc.waitForStarted())
     {
-        qDebug() << "Timeout at the start " << proc.readAllStandardOutput();
+        qDebug() << " Timeout at the start " << proc.readAllStandardOutput();
         return false;
     }
 
     if (!proc.waitForFinished(60000))
     {
-        qDebug() << "Timeout at the finish " << proc.readAllStandardOutput();
+        qDebug() << " Timeout at the finish " << proc.readAllStandardOutput();
         return false;
     }
 

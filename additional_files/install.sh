@@ -14,65 +14,78 @@ result()
 SFILE="S98ukmtimeup"
 KFILE="K02ukmtimeup"
 
-XSFILE="998-xukmtimeup"
+XSFILE="998-xukmtimeup.sh"
 
-echo "****************************************"
-echo "Install UkmTimeUp autorun Start script"
-if [ -f "/etc/rc3.d/$SFILE" ]; then
-	echo " /etc/rc3.d/$SFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc3.d/$SFILE
-	result
-fi
+FILE_UKMCLIENT="/usr/local/ukmclient"
+FILE_LILLO="/usr/local/lillo"
 
-echo "Install UkmTimeUp autorun Stop scripts"
-if [ -f "/etc/rc0.d/$KFILE" ]; then
-	echo " /etc/rc0.d/$KFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc0.d/$KFILE
-	result
-fi
+if [ -x $FILE_UKMCLIENT ]; then
+	echo "****************************************"
+	echo "Install UkmTimeUp autorun Start script"
+	if [ -f "/etc/rc3.d/$SFILE" ]; then
+		echo " /etc/rc3.d/$SFILE already exist "
+	else
+		ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc3.d/$SFILE
+		result
+	fi
 
-if [ -f "/etc/rc1.d/$KFILE" ]; then
-	echo " /etc/rc1.d/$KFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc1.d/$KFILE
-	result
-fi
+	echo "Install UkmTimeUp autorun Stop scripts"
+	if [ -f "/etc/rc0.d/$KFILE" ]; then
+		echo " /etc/rc0.d/$KFILE already exist "
+	else
+		ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc0.d/$KFILE
+		result
+	fi
 
-if [ -f "/etc/rc2.d/$KFILE" ]; then
-	echo " /etc/rc2.d/$KFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc2.d/$KFILE
-	result
-fi
+	if [ -f "/etc/rc1.d/$KFILE" ]; then
+		echo " /etc/rc1.d/$KFILE already exist "
+	else
+		ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc1.d/$KFILE
+		result
+	fi
 
-if [ -f "/etc/rc4.d/$KFILE" ]; then
-	echo " /etc/rc4.d/$KFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc4.d/$KFILE
-	result
-fi
+	if [ -f "/etc/rc2.d/$KFILE" ]; then
+		echo " /etc/rc2.d/$KFILE already exist "
+	else
+		ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc2.d/$KFILE
+		result
+	fi
 
-if [ -f "/etc/rc5.d/$KFILE" ]; then
-	echo " /etc/rc5.d/$KFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$KFILE
-	result
-fi
-echo "****************************************"
-echo
+	if [ -f "/etc/rc4.d/$KFILE" ]; then
+		echo " /etc/rc4.d/$KFILE already exist "
+	else
+		ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc4.d/$KFILE
+		result
+	fi
 
-echo "****************************************"
-echo "Install XUkmTimeUp autorun Start script"
-if [ -f "/usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE" ]; then
-	echo " /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE already exist "
+	if [ -f "/etc/rc5.d/$KFILE" ]; then
+		echo " /etc/rc5.d/$KFILE already exist "
+	else
+		ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$KFILE
+		result
+	fi
+	echo "****************************************"
+	echo
 else
-	ln -s /usr/local/ukmtimeup/xukmtimeup.sh /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE
-	result
+	if [ -x $FILE_LILLO ]; then
+		echo "****************************************"
+		echo "Install XUkmTimeUp autorun Start script"
+		if [ -f "/usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE" ]; then
+			echo " /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE already exist "
+		else
+			ln -s /usr/local/ukmtimeup/xukmtimeup.sh /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE
+			result
+		fi
+		echo "****************************************"
+		echo
+	else
+		echo "==============================="
+		echo "$(date)"
+		echo "ERROR: POS program not found"
+		echo "==============================="
+		exit 1
+	fi
 fi
-echo "****************************************"
-echo
 
 BASE_FOLDER="/usr/local/ukmtimeup"
 ZONE_ARCH="zoneinfo.tar.gz"
