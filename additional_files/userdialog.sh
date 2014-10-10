@@ -7,6 +7,9 @@ NEWTIME=`date +%H:%M:%S`
 LSLOCALTIME=`ls -l /etc/localtime`
 CURZONE=${LSLOCALTIME#*info/}
 
+echo "*********************" >> /var/log/ukmtimeup.log
+echo " userdialog started " >> /var/log/ukmtimeup.log
+
 setsysfont
 loadkeys -c -s /usr/local/ukmtimeup/ukm-sbrf.map
 setleds -D +num
@@ -42,6 +45,7 @@ read -n1 answer
 clear
 
 if [[ $answer -eq 1 ]]; then
+	echo " Pressed \"Correct time\" ($answer)" >> /var/log/ukmtimeup.log
 	ukmon
 	echo
 	echo "-----------------------------------------"
@@ -71,6 +75,7 @@ if [[ $answer -eq 1 ]]; then
 	
 	read -n1
 else
+	echo " Pressed \"Wrong time\" ($answer)" >> /var/log/ukmtimeup.log
 	ukmoff
 	echo
 	echo "-----------------------------------------"
@@ -104,3 +109,6 @@ fi
 . /etc/sysconfig/keyboard
 loadkeys $KEYTABLE
 setleds -D +num
+
+echo " userdialog finished " >> /var/log/ukmtimeup.log
+echo "*********************" >> /var/log/ukmtimeup.log

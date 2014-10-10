@@ -14,19 +14,14 @@ result()
 SFILE="S98ukmtimeup"
 KFILE="K02ukmtimeup"
 
+XSFILE="998-xukmtimeup"
+
 echo "****************************************"
 echo "Install UkmTimeUp autorun Start script"
 if [ -f "/etc/rc3.d/$SFILE" ]; then
 	echo " /etc/rc3.d/$SFILE already exist "
 else
 	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc3.d/$SFILE
-	result
-fi
-
-if [ -f "/etc/rc5.d/$SFILE" ]; then
-	echo " /etc/rc5.d/$SFILE already exist "
-else
-	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$SFILE
 	result
 fi
 
@@ -58,6 +53,26 @@ else
 	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc4.d/$KFILE
 	result
 fi
+
+if [ -f "/etc/rc5.d/$KFILE" ]; then
+	echo " /etc/rc5.d/$KFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/ukmtimeup.sh /etc/rc5.d/$KFILE
+	result
+fi
+echo "****************************************"
+echo
+
+echo "****************************************"
+echo "Install XUkmTimeUp autorun Start script"
+if [ -f "/usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE" ]; then
+	echo " /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE already exist "
+else
+	ln -s /usr/local/ukmtimeup/xukmtimeup.sh /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE
+	result
+fi
+echo "****************************************"
+echo
 
 BASE_FOLDER="/usr/local/ukmtimeup"
 ZONE_ARCH="zoneinfo.tar.gz"

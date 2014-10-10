@@ -38,7 +38,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "Unzip file success"
 
 echounix "chmod -v a+x to files at %host%"
-plink -batch -pw xxxxxx root@%host% chmod -v a+x %remote_dir%/*.sh
+plink -batch -pw xxxxxx root@%host% chmod -v a+x %remote_dir%/*.sh %remote_dir%/xuserdialog
 IF %ERRORLEVEL% NEQ 0 GOTO error
 echounix "chmod file success"
 

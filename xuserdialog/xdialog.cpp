@@ -70,7 +70,7 @@ void XDialog::succDialog()
     }
     else
     {
-        qDebug() << " Pressed \"Correct time\"";
+        qDebug() << " Pressed \"Correct time\" ";
         ui->dialogText->clear();
         ui->dialogText->append(m_dialog_succ);
 
@@ -92,7 +92,7 @@ void XDialog::failDialog()
     }
     else
     {
-        qDebug() << " Pressed \"Wrong time\"";
+        qDebug() << " Pressed \"Wrong time\" ";
         ui->dialogText->clear();
         ui->dialogText->append(m_dialog_fail);
 
