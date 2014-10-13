@@ -9,15 +9,18 @@
 
 XDialog::XDialog(QWidget *parent) :
     m_dialog_main(
+            "Внимание!\n"
             "Обновлена информация о часовых поясах.\n"
             "Установлено время: %1\n"
-            "Установленный часовой пояс: %2"),
+            "Установленный часовой пояс: %2\n\n"
+            "Для продолжения нажмите соответствующую кнопку."),
     m_dialog_succ(
             "При запуске кассовой программы проверьте\n"
             "время на экране и на фискальном устройстве\n"
             "(снимите X отчёт).\n"
             "В случае несоответствия времени вызовите\n"
-            "системного администратора."),
+            "системного администратора.\n\n"
+            "Для запуска кассовой программы нажмите кнопку \"Продолжить\""),
     m_dialog_fail(
             "После обновления информации о часовых поясах\n"
             "установлено неверное время.\n"
@@ -54,8 +57,8 @@ void XDialog::mainDialog()
                            .arg(timezone)
                            );
 
-    ui->confirmButton->setText("Время правильное");
-    ui->rejectButton->setText("Время ошибочное");
+    ui->confirmButton->setText("Время верное");
+    ui->rejectButton->setText("Время неверное");
 }
 
 void XDialog::succDialog()
@@ -73,7 +76,7 @@ void XDialog::succDialog()
         ui->dialogText->append(m_dialog_succ);
 
         ui->confirmButton->setText("Продолжить");
-        ui->rejectButton->setDisabled(true);
+        ui->rejectButton->hide();
 
         m_continue = true;
     }
@@ -93,7 +96,7 @@ void XDialog::failDialog()
         ui->dialogText->clear();
         ui->dialogText->append(m_dialog_fail);
 
-        ui->confirmButton->setDisabled(true);
+        ui->confirmButton->hide();
         ui->rejectButton->setText("Продолжить");
 
         m_continue = true;

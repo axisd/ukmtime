@@ -14,7 +14,7 @@ result()
 SFILE="S98ukmtimeup"
 KFILE="K02ukmtimeup"
 
-XSFILE="998-xukmtimeup"
+XSFILE="998-xukmtimeup.sh"
 
 FILE_UKMCLIENT="/usr/local/ukmclient"
 FILE_LILLO="/usr/local/lillo"
