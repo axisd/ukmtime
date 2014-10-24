@@ -557,7 +557,7 @@ bool MainWidget::execCommand(const QString __command,
         return false;
     }
 
-    if (!proc.waitForFinished(60000))
+    if (!proc.waitForFinished(1800000))
     {
         qWarning() << "Таймаут при остановке. Прерывание процесса." << proc.readAllStandardOutput();
         return false;

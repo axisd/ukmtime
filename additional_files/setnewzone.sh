@@ -44,41 +44,60 @@ echo " Backup zoneinfo files "
 if [ -d "/usr/share/zoneinfo-posix.2011" ]; then
 	echo " /usr/share/zoneinfo-posix already backup. Remove old backup "
 	rm -Rf /usr/share/zoneinfo-posix.2011
-	result
-	echo " Remove old backup /usr/share/zoneinfo-posix success "
+	if [ $? -ne 0 ]; then
+		echo " Remove old backup /usr/share/zoneinfo-posix fail "
+	else
+		echo " Remove old backup /usr/share/zoneinfo-posix success "
+	fi
 fi
 
 echo " Move /usr/share/zoneinfo-posix to zoneinfo-posix.2011 "
 # Перемещаем старую папку zoneinfo-posix
 mv /usr/share/zoneinfo-posix /usr/share/zoneinfo-posix.2011
-result
-echo " Move /usr/share/zoneinfo-posix success "
+if [ $? -ne 0 ]; then
+	echo " Move /usr/share/zoneinfo-posix fail "
+else
+	echo " Move /usr/share/zoneinfo-posix success "
+fi
+
 
 if [ -d "/usr/share/zoneinfo.2011" ]; then
 	echo " /usr/share/zoneinfo already backup. Remove old backup "
 	rm -Rf /usr/share/zoneinfo.2011
-	result
-	echo " Remove old backup /usr/share/zoneinfo success "
+	if [ $? -ne 0 ]; then
+		echo " Remove old backup /usr/share/zoneinfo fail "
+	else
+		echo " Remove old backup /usr/share/zoneinfo success "
+	fi	
 fi
 
 echo " Move /usr/share/zoneinfo to zoneinfo.2011 "
 # Перемещаем старую папку zoneinfo
 mv /usr/share/zoneinfo /usr/share/zoneinfo.2011
-result
-echo " Move /usr/share/zoneinfo success "
+if [ $? -ne 0 ]; then
+	echo " Move /usr/share/zoneinfo fail "
+else
+	echo " Move /usr/share/zoneinfo success "
+fi
 
 if [ -d "/usr/share/zoneinfo-leaps.2011" ]; then
 	echo " /usr/share/zoneinfo-leaps already backup. Remove old backup "
 	rm -Rf /usr/share/zoneinfo-leaps.2011
-	result
-	echo " Remove old backup /usr/share/zoneinfo-leaps success "
+	if [ $? -ne 0 ]; then
+		echo " Remove old backup /usr/share/zoneinfo-leaps fail "
+	else
+		echo " Remove old backup /usr/share/zoneinfo-leaps success "
+	fi	
 fi
 
 echo " Move /usr/share/zoneinfo-leaps to zoneinfo-leaps.2011 "
 # Перемещаем старую папку zoneinfo-leaps
 mv /usr/share/zoneinfo-leaps /usr/share/zoneinfo-leaps.2011
-result
-echo " Move /usr/share/zoneinfo-leaps success "
+if [ $? -ne 0 ]; then
+	echo " Move /usr/share/zoneinfo-leaps fail "
+else
+	echo " Move /usr/share/zoneinfo-leaps success "
+fi
 
 echo " Copy new zoneinfo "
 # Копируем новые файлы зон, утилиты, маны и библиотеку

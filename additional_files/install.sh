@@ -19,8 +19,13 @@ XSFILE="998-xukmtimeup.sh"
 FILE_UKMCLIENT="/usr/local/ukmclient"
 FILE_LILLO="/usr/local/lillo"
 
+OLD_XORG_PATH="/etc/X11/xinit/xinitrc.d"
+NEW_XORG_PATH="/usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d"
+XORG_PATH=""
+
 if [ -x $FILE_UKMCLIENT ]; then
 	echo "****************************************"
+	echo "Find UKMCLIENT"
 	echo "Install UkmTimeUp autorun Start script"
 	if [ -f "/etc/rc3.d/$SFILE" ]; then
 		echo " /etc/rc3.d/$SFILE already exist "
@@ -69,11 +74,31 @@ if [ -x $FILE_UKMCLIENT ]; then
 else
 	if [ -x $FILE_LILLO ]; then
 		echo "****************************************"
+		echo "Find LILLO"
 		echo "Install XUkmTimeUp autorun Start script"
-		if [ -f "/usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE" ]; then
-			echo " /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE already exist "
+		echo "Check XORG"
+		if [ -d $OLD_XORG_PATH ]; then
+			echo "Find XORG at $OLD_XORG_PATH"
+			XORG_PATH=$OLD_XORG_PATH
 		else
-			ln -s /usr/local/ukmtimeup/xukmtimeup.sh /usr/local/xorg/xorg-main/etc/X11/xinit/xinitrc.d/$XSFILE
+			if [ -d $NEW_XORG_PATH ]; then
+				echo "Find XORG at $NEW_XORG_PATH"
+				XORG_PATH=$NEW_XORG_PATH
+			else
+				echo "==============================="
+				echo "$(date)"
+				echo "ERROR: XORG startup dir not found"
+				echo "Find path: $OLD_XORG_PATH"
+				echo "Find path: $NEW_XORG_PATH"
+				echo "==============================="
+				exit 1
+			fi
+		fi
+		
+		if [ -f "$XORG_PATH/$XSFILE" ]; then
+			echo " $XORG_PATH/$XSFILE already exist "
+		else
+			ln -s /usr/local/ukmtimeup/xukmtimeup.sh $XORG_PATH/$XSFILE
 			result
 		fi
 		echo "****************************************"

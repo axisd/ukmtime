@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>УКМ4 Перевод времени 2014 (revision 002)</string>
+   <string>УКМ4 Перевод времени 2014 (revision 003)</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="2" column="1">

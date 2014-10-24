@@ -16,6 +16,8 @@ FILE_INIT_D_ZX11="$DIR_INIT_D/zx11"
 FILE_UKMCLIENT="/usr/local/ukmclient"
 FILE_LILLO="/usr/local/lillo"
 
+FILE_LILLO_LOCK="/var/lock/subsys/lillo"
+
 #######################################################################################
 #
 # Script functions
@@ -47,6 +49,7 @@ pos_program_detect()
 		echo -n "Checking $pos_program ... "
 		if [ -x $pos_program ]; then
 			echo "found"
+			pos_program_lock_clear="rm -fv $FILE_LILLO_LOCK"
 			pos_program_cmd_start="$FILE_INIT_D_ZX11 start"
 			pos_program_cmd_stop="$FILE_INIT_D_ZX11 stop"
 			pos_program_name="lillo"
@@ -104,6 +107,7 @@ pos_program_stop()
 	pos_program_check
 	echo "Stopping POS program"
 	$pos_program_cmd_stop
+	$pos_program_lock_clear
 	pos_program_wait_to_finish $pos_program_name
 	sleep 5
 	echo "pos_program_stop() end"
