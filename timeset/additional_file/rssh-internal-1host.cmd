@@ -12,6 +12,11 @@ set datetime=datetime.sh
 set remote_script_dir=/tmp
 set remote_script=%remote_script_dir%/%script%
 
+echo Check %host%
+echounix "yes" | plink -pw xxxxxx root@%host% echo "ok"
+IF %ERRORLEVEL% NEQ 0 GOTO error
+echo Check SUCCESS
+
 set remote_dir=%remote_script_dir%
 echo Transferring %script% to %remote_dir% at %host%
 pscp -batch -pw xxxxxx %script% root@%host%:%remote_dir%

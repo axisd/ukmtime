@@ -48,7 +48,8 @@ private:
 
     QStringList iplist;
 
-    bool loadIPList();    
+    bool loadIPList();
+    void flushResultFile() const;
 
 private slots:
     void selectCurDateTime(bool __select);

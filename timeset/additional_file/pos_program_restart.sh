@@ -126,23 +126,3 @@ pos_program_restart()
 	pos_program_stop
 	pos_program_start
 }
-
-#######################################################################################
-#
-# Script code begin
-#
-
-echo
-echo "========= $(date) $0 started ================"
-
-pos_program_detect
-
-pos_program_stop
-
-pos_program_start
-
-
-echo "========= $(date) $0 completed =============="
-echo
-
-exit 0

@@ -126,6 +126,18 @@ bool TimeSet::loadIPList()
     return true;
 }
 
+void TimeSet::flushResultFile() const
+{
+    QFile file_in(qApp->applicationDirPath()
+               .append(QDir::separator())
+               .append("result.txt"));
+
+    if(file_in.exists())
+    {
+        file_in.remove();
+    }
+}
+
 void TimeSet::selectCurDateTime(bool __select)
 {
     if(__select)
@@ -162,6 +174,7 @@ void TimeSet::clockTick()
 
 void TimeSet::setTime()
 {
+    flushResultFile();
     if(QMessageBox::Cancel == QMessageBox::warning(this, tr("Установка времени"),
                                     tr("На кассы будет установлено новое время.\n\n\n"
                                        "Начать установку?"),
@@ -195,7 +208,7 @@ void TimeSet::result(QString __result)
                .append(QDir::separator())
                .append("result.txt"));
 
-    if (!file_in.open(QIODevice::WriteOnly))
+    if (!file_in.open(QIODevice::WriteOnly | QIODevice::Append))
     {
         qCritical() << QString("Невозможно открыть файл: %1").arg(file_in.fileName());
         return;

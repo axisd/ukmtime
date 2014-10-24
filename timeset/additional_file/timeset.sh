@@ -15,45 +15,12 @@ result()
 
 echo "==== $0 started $(date)"
 
+. /tmp/pos_program_restart.sh
 
-FILE_FORCEKILLUKM="/usr/local/ukmclient/forcekillukm"
-FILE_INITD_UKMCLIENT="/etc/init.d/ukmclient"
-FILE_INITD_LILLO="/etc/init.d/lillo"
+pos_program_detect
+pos_program_stop
 
-FOUND_FORCEKILLUKM="n"
-FOUND_INITD_UKMCLIENT="n"
-FOUND_INITD_LILLO="n"
-
-echo -n "Checking if $FILE_FORCEKILLUKM exists ... "
-if [ -f $FILE_FORCEKILLUKM ]; then
-	echo "found"
-	FOUND_FORCEKILLUKM="y"
-	echo "Executing $FILE_FORCEKILLUKM"
-	$FILE_FORCEKILLUKM
-else
-	echo "not found"
-	echo -n "Checking if $FILE_INITD_UKMCLIENT exists ... "
-	if [ -f $FILE_INITD_UKMCLIENT ]; then
-		echo "found"
-		FOUND_INITD_UKMCLIENT="y"
-		echo "Executing $FILE_INITD_UKMCLIENT stop"
-		$FILE_INITD_UKMCLIENT stop
-	else
-		echo "not found"
-
-		echo -n "Checking if $FILE_INITD_LILLO exists ... "
-		if [ -f $FILE_INITD_LILLO ]; then
-			echo "found"
-			FOUND_INITD_LILLO="y"
-			echo "Executing $FILE_INITD_LILLO stop"
-			$FILE_INITD_LILLO stop
-		else
-			echo "not found"
-		fi
-	fi
-fi
-
-NEWTIME="$*"
+. /tmp/datetime.sh
 
 echo "Current system time is: $(date)"
 
@@ -111,9 +78,7 @@ result
 
 echo "System time is set to:  $(date)"
 
-echo "Executing $FILE_INITD_UKMCLIENT start"
-$FILE_INITD_UKMCLIENT start
-
+pos_program_start
 
 echo "==== SUCCESS: $0 completed $(date)"
 
