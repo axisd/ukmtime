@@ -314,35 +314,26 @@ void MainWidget::testIp()
     QHash<QString, HostIpStatus>::iterator i = iplist.begin();
     while (i != iplist.end())
     {
-        QString addr("root@");
-        addr.append(i.key());
+        QStringList args_list;
+        args_list << "/C" << "check.cmd" << i.key();
 
-        qDebug() << QString("Старт plink на %1").arg(i.key());
-        QProcess plink;
-        plink.start("extra/plink", QStringList() << "-batch"
-                   << "-pw" << "xxxxxx"
-                   << addr
-                   << "echo" << "OK");
+        qDebug() << QString("Старт проверки %1").arg(i.key());
+        qDebug() << "cmd.exe" << args_list;
 
-        if (!plink.waitForStarted(1000))
+        QByteArray output;
+        if(execCommand("cmd.exe", args_list, output))
         {
-            qWarning() << "Таймаут при старте plink";
-        }
-
-        if (!plink.waitForFinished(1000))
-        {
-            qWarning() << "Таймаут при остановке plink";
-        }
-
-        if(plink.readAll().contains("OK"))
-        {
-            i.value() = ONLINE;
-            qDebug() << QString("Результат проверки %1 - ONLINE").arg(i.key());
-        }
-        else
-        {
-            qDebug() << QString("Результат проверки %1 - OFFLINE").arg(i.key());
-            i.value() = OFFLINE;
+            qDebug() << "Результат: " << output;
+            if(!output.contains("FAIL"))
+            {
+                i.value() = ONLINE;
+                qDebug() << QString("Результат проверки %1 - ONLINE").arg(i.key());
+            }
+            else
+            {
+                i.value() = OFFLINE;
+                qDebug() << QString("Результат проверки %1 - OFFLINE").arg(i.key());
+            }
         }
 
         QList<QTableWidgetItem*> listI = ui->ipTable->findItems(i.key(), Qt::MatchFixedString);
