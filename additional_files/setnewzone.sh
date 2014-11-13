@@ -12,7 +12,7 @@ result()
 }
 
 echo "****************************************"
-echo " 			Start setzone.sh 			"
+echo " 			Start setnewzone.sh 			"
 
 echo " Save current time "
 # сохранием текущие дату и время
@@ -32,13 +32,20 @@ echo " Backup /etc/localtime "
 if [ -f "/etc/localtime.2011_2" ]; then
 	echo " /etc/localtime already backup. Remove old backup "
 	rm -Rf /etc/localtime.2011_2
-	result
-	echo " Remove old backup success "
+	if [ $? -ne 0 ]; then
+		echo " Remove old backup /etc/localtime.2011_2 fail "
+	else
+		echo " Remove old backup /etc/localtime.2011_2 success "
+	fi
 fi
 
+echo " Move /etc/localtime to /etc/localtime.2011_2 "
 mv /etc/localtime  /etc/localtime.2011_2
-result
-echo " Backup file is /etc/localtime.2011_2 "
+if [ $? -ne 0 ]; then
+	echo " Move /etc/localtime fail "
+else
+	echo " Move /etc/localtime success "
+fi
 
 echo " Backup zoneinfo files "
 if [ -d "/usr/share/zoneinfo-posix.2011" ]; then

@@ -42,13 +42,20 @@ echo " Backup /etc/localtime "
 if [ -f "/etc/localtime.2011_1" ]; then
 	echo " /etc/localtime.2011_1 already backup. Remove old backup "
 	rm -Rf /etc/localtime.2011_1
-	result
-	echo " Remove old backup success "
+	if [ $? -ne 0 ]; then
+		echo " Remove old backup /etc/localtime.2011_1 fail "
+	else
+		echo " Remove old backup /etc/localtime.2011_1 success "
+	fi
 fi
 
+echo " Move /etc/localtime to /etc/localtime.2011_1 "
 mv /etc/localtime  /etc/localtime.2011_1
-result
-echo " Backup file is /etc/localtime.2011_1 "
+if [ $? -ne 0 ]; then
+	echo " Move /etc/localtime fail "
+else
+	echo " Move /etc/localtime success "
+fi
 
 echo " Create symlink fon nem timezone "
 # Создаем символическую ссылку на нужный нам timezone: 
